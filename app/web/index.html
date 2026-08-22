@@ -49,16 +49,19 @@
       <p class="asof" id="asof">Northwind · —</p>
 
       <div class="tiles">
-        <div class="tile"><div class="lbl">Cash on hand</div><div class="val" id="k-cash">—</div>
-          <div class="foot" id="k-cash-f">treasury</div></div>
+        <div class="tile"><div class="lbl">Cash on hand</div>
+          <div class="val" id="k-cash">—</div>
+          <div class="foot"><span class="dn" id="k-cash-d">▼ 2.5%</span> vs 30d ago</div>
+          <svg class="spark" id="sp-cash" viewBox="0 0 100 26" preserveAspectRatio="none"></svg></div>
         <div class="tile"><div class="lbl">Net burn / mo</div><div class="val" id="k-burn">—</div>
           <div class="foot">monthly outflow</div></div>
         <div class="tile"><div class="lbl">Runway</div><div class="val" id="k-runway">—</div>
           <div class="foot"><span class="tag g" id="k-runway-t">healthy</span></div></div>
+        <div class="tile"><div class="lbl">Spend MTD</div><div class="val" id="k-mtd">—</div>
+          <div class="foot"><span class="up" id="k-mtd-d">▲ 6.2%</span> vs last mo</div>
+          <svg class="spark red" id="sp-mtd" viewBox="0 0 100 26" preserveAspectRatio="none"></svg></div>
         <div class="tile"><div class="lbl">Events reasoned about</div><div class="val" id="k-proc">0</div>
-          <div class="foot"><span id="k-esc">0</span> escalated</div></div>
-        <div class="tile"><div class="lbl">Context withheld</div><div class="val" id="k-red">—</div>
-          <div class="foot">of available units</div></div>
+          <div class="foot"><span id="k-esc">0</span> escalated · <span id="k-red">—</span> withheld</div></div>
         <div class="tile good"><div class="lbl">Sensitive units exposed</div>
           <div class="val" id="k-exposed">0</div><div class="foot" id="k-queued">0 queued offline</div></div>
       </div>
@@ -66,7 +69,16 @@
       <div class="grid g2">
         <div>
           <div class="card"><h3>Spend <span class="r">last 3 months</span></h3>
-            <div class="bars" id="c-bars"><div class="blank">—</div></div><div style="height:12px"></div></div>
+            <div class="bars" id="c-bars"><div class="blank">—</div></div><div style="height:14px"></div></div>
+
+          <div class="tiles t3">
+            <div class="tile"><div class="lbl">Transactions</div><div class="val" id="k-txn">—</div>
+              <div class="foot"><span class="up">▲ 6%</span> vs last period</div></div>
+            <div class="tile"><div class="lbl">Active cards</div><div class="val" id="k-cards">—</div>
+              <div class="foot">PANs never leave the box</div></div>
+            <div class="tile"><div class="lbl">Flagged</div><div class="val" id="k-flag">—</div>
+              <div class="foot">at or above 0.60 risk</div></div>
+          </div>
 
           <div class="card ai"><h3><span class="dia">◆</span> SafeContext AI <span class="r">planner runs on the box</span></h3>
             <div class="in">
@@ -88,23 +100,31 @@
             </div>
           </div>
 
+          <div class="card"><h3>Cash position &amp; forecast
+            <span class="r" id="fc-note">no shortfall in horizon</span></h3>
+            <div class="in" style="padding:10px 12px 4px"><svg id="fc" viewBox="0 0 720 200"
+              preserveAspectRatio="none" style="width:100%;height:200px"></svg></div>
+            <div class="fclegend"><span><i class="ln"></i>balance</span>
+              <span><i class="bd"></i>p10–p90</span><span><i class="tdy"></i>today</span></div></div>
+
           <div class="card"><h3>Live stream <span class="r" id="stream-state">idle</span></h3>
             <div class="in t scroll"><table>
               <thead><tr><th>time</th><th>merchant</th><th>tier</th><th class="num">amount</th><th class="num">ms</th></tr></thead>
               <tbody id="stream-rows"><tr><td colspan="5" class="blank">no events yet — press Run stream</td></tr></tbody>
-            </table></div>
-          </div>
+            </table></div></div>
         </div>
 
         <div>
           <div class="card"><h3>Gross spend <span class="r">this period</span></h3>
-            <div class="in" style="padding-bottom:6px"><div class="val" style="font-size:30px;font-weight:670;letter-spacing:-.9px" id="g-total">—</div></div>
-            <div id="g-cats"></div><div style="height:10px"></div></div>
+            <div class="in" style="padding-bottom:2px"><div id="g-total"
+              style="font-size:31px;font-weight:670;letter-spacing:-1px">—</div>
+              <div class="foot muted" style="margin-top:2px"><span class="up">▲ 6%</span></div></div>
+            <div id="g-cats"></div><div style="height:12px"></div></div>
 
           <div class="card"><div class="eyebrow"><span style="color:var(--blue)">◆</span> AI Insight</div>
-            <div class="in"><div class="val" style="font-size:28px;font-weight:670" id="ins-pct">—</div>
-              <div class="muted" style="margin-top:4px">of available context withheld</div>
-              <p class="muted" style="margin:10px 0 0;line-height:1.5" id="ins-txt">
+            <div class="in"><div style="font-size:29px;font-weight:670;letter-spacing:-.9px" id="ins-pct">—</div>
+              <div class="muted" style="margin-top:3px">of available context withheld</div>
+              <p class="muted" style="margin:11px 0 0;line-height:1.55" id="ins-txt">
                 SafeContext reviewed every event locally.</p></div></div>
 
           <div class="card"><div class="eyebrow">Needs attention <span class="r" id="att-count"></span></div>
@@ -112,8 +132,17 @@
 
           <div class="card"><h3>Top merchants</h3><div class="in t"><table><tbody id="m-rows">
             <tr><td class="blank">—</td></tr></tbody></table></div></div>
+
+          <div class="card"><h3>Spend by category <span class="r" id="sc-total"></span></h3>
+            <div id="sc-list"></div><div style="height:10px"></div></div>
         </div>
       </div>
+
+      <div class="card"><div class="eyebrow">Recent flagged transactions
+          <span class="r" id="fl-count"></span></div>
+        <div class="in t scroll"><table><thead><tr><th>date</th><th>merchant</th><th>employee</th>
+          <th>category</th><th class="num">amount</th><th>flags</th><th class="num">risk</th></tr></thead>
+          <tbody id="fl-rows"><tr><td colspan="7" class="blank">—</td></tr></tbody></table></div></div>
     </section>
 
     <!-- ========================= AUTOMATION ========================= -->

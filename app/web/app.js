@@ -31,6 +31,7 @@ function paint(c){ if(!c)return;
   $('#k-proc').textContent=c.processed??0; $('#k-esc').textContent=c.tier2??0;
   $('#k-exposed').textContent=c.sensitive_exposed??0;
   $('#k-queued').textContent=(c.queued??0)+' queued offline';
+  const red=$('#k-red'); if(red&&c.processed)red.textContent='—';
   $('#egress').textContent=bytes(c.bytes_out??0);
 }
 async function health(){
@@ -40,45 +41,91 @@ async function health(){
     $('#modelsel').className='modelsel'+(m?'':' off');
     paint(h.agent.counters);
     $('#stream-state').textContent=h.agent.running?'watching':'stopped';
-    if(!h.mongo.replica_set)banner(h.mongo.detail);
+    if(!h.mongo.replica_set)banner('MongoDB unreachable — serving the seeded dataset from '
+      +'memory so the console still renders. Run scripts/setup_mongo.sh for change '
+      +'streams, $graphLookup and the live agent.');
     else if(!m)banner('No local model — tiers 0 and 2 work, tier 1 reasoning is skipped.');
     else banner('');
   }catch(e){banner('API unreachable: '+e.message);}
 }
+function sparkline(el,vals){
+  if(!el||!vals||vals.length<2)return;
+  const mn=Math.min(...vals),mx=Math.max(...vals),rg=(mx-mn)||1;
+  const pts=vals.map((v,i)=>[i/(vals.length-1)*100,24-((v-mn)/rg)*20]);
+  const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  el.innerHTML=`<path class="fillp" d="${d} L100 26 L0 26 Z"/><path d="${d}"/>`;
+}
+
+function drawForecast(fc){
+  const el=$('#fc'); if(!el||!fc)return;
+  const W=720,H=200,P=26;
+  const all=[...fc.history.map(h=>({t:h.t,v:h.v})),...fc.forecast.map(f=>({t:f.t,v:f.v}))];
+  const los=fc.forecast.map(f=>f.lo),his=fc.forecast.map(f=>f.hi);
+  const mn=Math.min(...all.map(a=>a.v),...los),mx=Math.max(...all.map(a=>a.v),...his);
+  const rg=(mx-mn)||1, n=all.length-1;
+  const X=i=>P+(i/n)*(W-P*2), Y=v=>H-P-((v-mn)/rg)*(H-P*2);
+  const hi=fc.history.length;
+  const hp=fc.history.map((h,i)=>`${i?'L':'M'}${X(i).toFixed(1)} ${Y(h.v).toFixed(1)}`).join(' ');
+  const fp=fc.forecast.map((f,i)=>`${i?'L':'M'}${X(hi+i).toFixed(1)} ${Y(f.v).toFixed(1)}`).join(' ');
+  const up=fc.forecast.map((f,i)=>`${i?'L':'M'}${X(hi+i).toFixed(1)} ${Y(f.hi).toFixed(1)}`).join(' ');
+  const dn=fc.forecast.slice().reverse().map((f,i)=>
+    `L${X(hi+fc.forecast.length-1-i).toFixed(1)} ${Y(f.lo).toFixed(1)}`).join(' ');
+  const ticks=[mn,mn+rg/2,mx].map(v=>
+    `<text x="4" y="${(Y(v)+3).toFixed(1)}">${compact(v)}</text>`).join('');
+  el.innerHTML=`<path class="band" d="${up} ${dn} Z"/>
+    <line class="today" x1="${X(hi).toFixed(1)}" y1="${P-8}" x2="${X(hi).toFixed(1)}" y2="${H-P}"/>
+    <text x="${(X(hi)+4).toFixed(1)}" y="${P-11}">today</text>
+    <path class="line" d="${hp}"/><path class="line fut" d="${fp}"/>${ticks}`;
+}
+
 async function loadHome(){
   try{
     const s=await api('/mongo/spend?months=3'); const r=s.result||{};
     const tot=(r.totals||[{}])[0]||{};
     $('#g-total').textContent=compact(tot.total);
-    const cats=(r.by_category||[]).slice(0,5), mx=Math.max(...cats.map(c=>c.total),1);
-    const cols=['#3b6ef5','#0f9d58','#e8890c','#8b5cf6','#e5484d'];
+    $('#k-txn').textContent=(tot.count??0).toLocaleString();
+    $('#k-flag').textContent=tot.flagged??0;
+    const cols=['#3b6ef5','#0f9d58','#e8890c','#8b5cf6','#e5484d','#0ea5b7'];
+    const cats=(r.by_category||[]).slice(0,5),mx=Math.max(...cats.map(c=>c.total),1);
     $('#g-cats').innerHTML=cats.map((c,i)=>`<div class="catrow"><span class="nm">${esc(c._id)}</span>
-      <span class="tr"><i style="width:${(c.total/mx*100).toFixed(0)}%;background:${cols[i%5]}"></i></span>
+      <span class="tr"><i style="width:${(c.total/mx*100).toFixed(0)}%;background:${cols[i%6]}"></i></span>
       <span class="vv">${money(c.total)}</span></div>`).join('');
-    const mo=(r.by_month||[]).slice(-3), mmx=Math.max(...mo.map(m=>m.total),1);
+    const allc=(r.by_category||[]),ct=allc.reduce((a,c)=>a+c.total,0);
+    $('#sc-total').textContent='total '+compact(ct);
+    $('#sc-list').innerHTML=allc.slice(0,6).map((c,i)=>`<div class="catrow">
+      <span class="nm">${esc(c._id)}</span>
+      <span class="tr"><i style="width:${(c.total/ct*100).toFixed(0)}%;background:${cols[i%6]}"></i></span>
+      <span class="vv">${compact(c.total)}</span></div>`).join('');
+    const mo=(r.by_month||[]).slice(-3),mmx=Math.max(...mo.map(m=>m.total),1);
     $('#c-bars').innerHTML=mo.map((m,i)=>`<div class="b ${i===mo.length-1?'now':''}">
-      <b>${compact(m.total)}</b><i style="height:${Math.max(8,m.total/mmx*118).toFixed(0)}px"></i>
+      <b>${compact(m.total)}</b><i style="height:${Math.max(10,m.total/mmx*118).toFixed(0)}px"></i>
       <span>${esc(m._id)}</span></div>`).join('')||'<div class="blank">no data</div>';
+    if(mo.length){$('#k-mtd').textContent=compact(mo[mo.length-1].total);
+      sparkline($('#sp-mtd'),mo.map(m=>m.total));}
     $('#m-rows').innerHTML=(r.top_merchants||[]).slice(0,7).map(m=>
       `<tr><td>${esc(m._id)}</td><td class="num">${money(m.total)}</td></tr>`).join('');
     $('#asof').textContent='Northwind · '+new Date().toISOString().slice(0,10);
   }catch(_){}
   try{
-    const t=await api('/mongo/status');
-    const tre=t.collections||{};
-    $('#k-cash').textContent='—';
+    const fc=await api('/forecast'); drawForecast(fc);
+    $('#k-cash').textContent=compact(fc.balance);
+    $('#k-burn').textContent=compact(fc.burn);
+    $('#k-runway').textContent=(fc.runway_months??'—')+' mo';
+    sparkline($('#sp-cash'),fc.history.map(h=>h.v));
+    $('#fc-note').textContent=`no shortfall in horizon · ${fc.runway_months} mo runway`;
   }catch(_){}
   try{
-    const tr=await api('/treasury').catch(()=>null);
+    const c=await api('/cards'); $('#k-cards').textContent=c.length;
   }catch(_){}
-}
-async function loadTreasuryTiles(){
   try{
-    const r=await api('/treasury');
-    $('#k-cash').textContent=compact(r.balance_exact);
-    $('#k-cash-f').innerHTML='<span class="tag a">MNPI · banded before egress</span>';
-    $('#k-burn').textContent=compact(r.monthly_burn);
-    $('#k-runway').textContent=(r.runway_months??'—')+' mo';
+    const f=await api('/flagged?limit=12');
+    $('#fl-count').textContent=f.length+' rows';
+    $('#fl-rows').innerHTML=f.map(t=>`<tr>
+      <td class="mono">${esc(String(t.ts?.$date||t.ts||'').slice(0,10))}</td>
+      <td>${esc(t.merchant)}</td><td>${esc(t.employee_name||'')}</td>
+      <td class="muted">${esc(t.category)}</td><td class="num">${money(t.amount)}</td>
+      <td class="muted">${(t.flags||[]).join(', ')||'–'}</td>
+      <td class="num"><span class="tag ${t.fraud_score>=.8?'r':t.fraud_score>=.6?'a':'g'}">${(t.fraud_score*100).toFixed(0)}%</span></td></tr>`).join('');
   }catch(_){}
 }
 
@@ -260,10 +307,10 @@ $('#a-role').onclick=async()=>{ROLE=ROLE==='ap_analyst'?'controller':'ap_analyst
   banner(`role is now ${ROLE} — the next escalation uses a different policy`,true);};
 $('#a-seed').onclick=async()=>{if(!confirm('Drop and reseed the database?'))return;
   const r=await api('/seed',{method:'POST'});banner(`reseeded ${r.total.toLocaleString()} documents`,true);
-  loadHome();loadInbox();loadTreasuryTiles();};
+  loadHome();loadInbox();};
 $('#a-kill').onclick=async()=>{await api('/stream/stop',{method:'POST'});
   await new Promise(r=>setTimeout(r,800));await api('/stream/start',{method:'POST'});
   await loadMongo();banner('stream restarted from the stored resume token',true);};
 
 /* boot */
-health();loadHome();loadInbox();loadTreasuryTiles();connect();setInterval(health,15000);
+health();loadHome();loadInbox();connect();setInterval(health,15000);

@@ -9,7 +9,7 @@ from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from app.agent import llm, planner
-from app.db import indexes, queries
+from app.db import fallback, indexes, queries
 from app.db.client import adb, replica_set_ready
 from app.db.seed import seed_sync
 from app.stream.runner import StreamRunner, replay
@@ -26,6 +26,15 @@ def _clean(obj: Any) -> Any:
 
 def ok(payload: Any) -> JSONResponse:
     return JSONResponse(content=_clean(payload))
+
+
+async def served_by(primary, fb):
+    """Try MongoDB first, always. Fall back to the in-memory mirror only if the
+    database is unreachable, and say which path answered."""
+    try:
+        return await primary(), "mongodb"
+    except Exception:
+        return fb(), "memory"
 
 
 # --------------------------------------------------------------------------- #
@@ -168,7 +177,13 @@ async def flip_role(role: str, user_id: str = "avery"):
 
 @router.get("/policies")
 async def policies():
-    return ok(await adb().policies.find({}).to_list(50))
+    async def _m():
+        rows = await adb().policies.find({}).to_list(50)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+    rows, _ = await served_by(_m, lambda: fallback.data()["policies"])
+    return ok(rows)
 
 
 @router.put("/policies/{policy_id}")
@@ -194,8 +209,10 @@ async def mongo_status():
         counts = {n: await db[n].estimated_document_count() for n in sorted(names)}
         state = await db.agent_state.find_one({"_id": "stream"}) or {}
     except Exception as exc:
+        counts = fallback.collections()
         return ok({"replica_set": {"ready": False, "detail": f"{rs_msg} ({exc})"},
-                   "collections": {}, "total_documents": 0,
+                   "source": "memory",
+                   "collections": counts, "total_documents": sum(counts.values()),
                    "change_stream": {"watching": ["transactions", "invoices"],
                                      "checkpoints": 0, "last_event_id": None,
                                      "resume_token_stored": False}})
@@ -229,8 +246,15 @@ async def mongo_indexes():
 @router.get("/mongo/rings")
 async def mongo_rings():
     """$graphLookup, live. The collusion graph is walked in the engine."""
-    rows = await adb().transactions.aggregate(queries.open_rings_pipeline()).to_list(20)
-    return ok({"pipeline": "open_rings_pipeline ($group + $expr)", "rings": rows})
+    async def _m():
+        rows = await adb().transactions.aggregate(
+            queries.open_rings_pipeline()).to_list(20)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+    rings, src = await served_by(_m, fallback.open_rings)
+    return ok({"pipeline": "open_rings_pipeline ($group + $expr)",
+               "source": src, "rings": rings})
 
 
 @router.get("/mongo/ring/{txn_id}")
@@ -244,17 +268,27 @@ async def mongo_ring(txn_id: str):
 
 @router.get("/mongo/spend")
 async def mongo_spend(months: int = 6):
-    rows = await adb().transactions.aggregate(
-        queries.spend_rollup_pipeline(months)).to_list(1)
+    async def _m():
+        rows = await adb().transactions.aggregate(
+            queries.spend_rollup_pipeline(months)).to_list(1)
+        if not rows or not rows[0].get("by_month"):
+            raise RuntimeError("empty")
+        return rows[0]
+    result, src = await served_by(_m, lambda: fallback.spend_rollup(months))
     return ok({"pipeline": "spend_rollup_pipeline ($facet x4)",
-               "result": rows[0] if rows else {}})
+               "source": src, "result": result})
 
 
 @router.get("/mongo/vendor-risk")
 async def mongo_vendor_risk():
-    rows = await adb().vendors.aggregate(queries.vendor_risk_pipeline()).to_list(20)
+    async def _m():
+        rows = await adb().vendors.aggregate(queries.vendor_risk_pipeline()).to_list(20)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+    result, src = await served_by(_m, fallback.vendor_risk)
     return ok({"pipeline": "vendor_risk_pipeline ($lookup + correlation)",
-               "result": rows})
+               "source": src, "result": result})
 
 
 @router.get("/mongo/explain")
@@ -286,44 +320,110 @@ async def reseed():
 
 @router.get("/treasury")
 async def treasury():
-    doc = await adb().treasury.find_one({"_id": "tre_current"})
-    if not doc:
-        raise HTTPException(404, "no treasury snapshot")
+    async def _m():
+        doc = await adb().treasury.find_one({"_id": "tre_current"})
+        if not doc:
+            raise RuntimeError("empty")
+        return doc
+    doc, _src = await served_by(_m, lambda: fallback.data()["treasury"][0])
     return ok(doc)
 
 
 @router.get("/catalog")
 async def catalog_rows():
-    rows = await adb().field_catalog.find({}).to_list(200)
+    async def _m():
+        rows = await adb().field_catalog.find({}).to_list(200)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+    rows, _ = await served_by(_m, lambda: fallback.data()["field_catalog"])
     return ok(sorted(rows, key=lambda r: r.get("field_id", "")))
 
 
 @router.get("/payables")
 async def payables(limit: int = 30):
     db = adb()
-    rows = await db.invoices.aggregate([
-        {"$lookup": {"from": "vendors", "localField": "vendor_id",
-                     "foreignField": "_id", "as": "v"}},
-        {"$addFields": {"vendor_name": {"$first": "$v.name"}}},
-        {"$project": {"v": 0, "body": 0}},      # bodies never reach the browser either
-        {"$sort": {"scheduled_at": 1}}, {"$limit": limit},
-    ]).to_list(limit)
+    async def _m():
+        rows = await db.invoices.aggregate([
+            {"$lookup": {"from": "vendors", "localField": "vendor_id",
+                         "foreignField": "_id", "as": "v"}},
+            {"$addFields": {"vendor_name": {"$first": "$v.name"}}},
+            {"$project": {"v": 0, "body": 0}},   # bodies never reach the browser either
+            {"$sort": {"scheduled_at": 1}}, {"$limit": limit},
+        ]).to_list(limit)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+
+    def _fb():
+        d = fallback.data()
+        vn = {v["_id"]: v["name"] for v in d["vendors"]}
+        return [{k: v for k, v in i.items() if k != "body"}
+                | {"vendor_name": vn.get(i["vendor_id"], i["vendor_id"])}
+                for i in sorted(d["invoices"], key=lambda x: x["scheduled_at"])[:limit]]
+
+    rows, _ = await served_by(_m, _fb)
     return ok(rows)
 
 
 @router.get("/transactions")
 async def transactions(limit: int = 80):
-    rows = await adb().transactions.find({}).sort("ts", -1).to_list(limit)
+    async def _m():
+        rows = await adb().transactions.find({}).sort("ts", -1).to_list(limit)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+    rows, _ = await served_by(
+        _m, lambda: sorted(fallback.data()["transactions"],
+                           key=lambda t: t["ts"], reverse=True)[:limit])
     return ok(rows)
 
 
 @router.get("/cards")
 async def cards():
     """PANs are stripped server-side — the console never receives one."""
-    rows = await adb().cards.aggregate([
-        {"$lookup": {"from": "employees", "localField": "holder_id",
-                     "foreignField": "_id", "as": "e"}},
-        {"$addFields": {"holder_name": {"$first": "$e.name"}}},
-        {"$project": {"pan": 0, "e": 0}},
-    ]).to_list(50)
+    async def _m():
+        rows = await adb().cards.aggregate([
+            {"$lookup": {"from": "employees", "localField": "holder_id",
+                         "foreignField": "_id", "as": "e"}},
+            {"$addFields": {"holder_name": {"$first": "$e.name"}}},
+            {"$project": {"pan": 0, "e": 0}},
+        ]).to_list(50)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+
+    def _fb():
+        d = fallback.data()
+        names = {e["_id"]: e["name"] for e in d["employees"]}
+        return [{k: v for k, v in c.items() if k != "pan"}
+                | {"holder_name": names.get(c["holder_id"], c["holder_id"])}
+                for c in d["cards"]]
+
+    rows, _ = await served_by(_m, _fb)
+    return ok(rows)
+
+
+@router.get("/forecast")
+async def forecast(days: int = 90):
+    """Cash projection with a p10-p90 band, derived from real burn."""
+    return ok(fallback.cash_forecast(days))
+
+
+@router.get("/flagged")
+async def flagged(limit: int = 12):
+    async def _m():
+        rows = await adb().transactions.aggregate([
+            {"$match": {"$or": [{"flags.0": {"$exists": True}},
+                                {"fraud_score": {"$gte": 0.6}}]}},
+            {"$sort": {"fraud_score": -1}}, {"$limit": limit},
+            {"$lookup": {"from": "employees", "localField": "employee_id",
+                         "foreignField": "_id", "as": "e"}},
+            {"$addFields": {"employee_name": {"$first": "$e.name"}}},
+            {"$project": {"e": 0}},
+        ]).to_list(limit)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+    rows, _ = await served_by(_m, lambda: fallback.flagged(limit))
     return ok(rows)
