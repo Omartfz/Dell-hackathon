@@ -21,8 +21,8 @@ function go(p){
   $$('aside a').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
   $$('.page').forEach(s=>s.classList.toggle('on',s.dataset.page===p));
   window.scrollTo(0,0);
-  ({automation:loadInbox,mongo:loadMongo,controls:loadControls,payables:loadPayables,
-    expenses:loadExpenses,cards:loadCards,treasury:loadTreasury}[p]||(()=>{}))();
+  // already populated at boot; refresh the live ones so nothing goes stale
+  ({automation:loadInbox,mongo:loadMongo,home:loadHome}[p]||(()=>{}))();
 }
 
 /* header + tiles */
@@ -314,5 +314,15 @@ $('#a-kill').onclick=async()=>{await api('/stream/stop',{method:'POST'});
   await new Promise(r=>setTimeout(r,800));await api('/stream/start',{method:'POST'});
   await loadMongo();banner('stream restarted from the stored resume token',true);};
 
-/* boot */
-health();loadHome();loadInbox();connect();setInterval(health,15000);
+/* boot — every screen is populated before it is opened, so no tab is ever blank */
+async function boot(){
+  health(); connect();
+  await Promise.allSettled([loadHome(),loadInbox()]);
+  await Promise.allSettled([loadMongo(),loadControls(),loadPayables(),
+                            loadExpenses(),loadCards(),loadTreasury()]);
+  // open the first inbox item so the escalation detail is populated too
+  const first=document.querySelector('#auto-list .att');
+  if(first)detail(first.dataset.ev);
+  setInterval(health,15000);
+}
+boot();
