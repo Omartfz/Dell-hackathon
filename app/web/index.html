@@ -39,6 +39,32 @@
     <!-- ============================ HOME ============================ -->
     <section class="page on" data-page="home">
       <h1 class="h1">Home</h1><p class="sub">Command center</p>
+
+      <div class="explain">
+        <div class="ex-main">
+          <h4>What this is</h4>
+          <p>This is a corporate spend platform — cards, invoices, vendor payments — with a
+          <b>privacy layer built into it</b>. An AI agent runs locally on the Dell GB10 and reasons
+          about <b>every transaction and document</b> as it arrives.</p>
+          <p>Most it settles on the box, where nothing leaves. For the few hard cases that need a
+          bigger cloud model, it first strips the payload to the minimum that model actually needs:
+          names become aliases, amounts become bands, and card numbers and bank details
+          <b>never leave at all</b>.</p>
+          <p class="ex-punch">A model that never sees an account number cannot leak one.</p>
+        </div>
+        <div class="ex-ladder">
+          <h4>How every event is handled</h4>
+          <div class="lad"><span class="ld t0"></span><div><b>Tier 0 · Rules</b>
+            <span>Deterministic scoring. ~97% of events end here. <em>0 bytes leave.</em></span></div></div>
+          <div class="lad"><span class="ld t1"></span><div><b>Tier 1 · Local AI</b>
+            <span>The GB10 model reasons about the raw record. <em>0 bytes leave.</em></span></div></div>
+          <div class="lad"><span class="ld t2"></span><div><b>Tier 2 · Escalated</b>
+            <span>Hard, high-value cases only. <em>Minimized payload leaves.</em></span></div></div>
+          <p class="ex-note">Tiers 0 and 1 need no internet at all. Unplug the box and the
+          agent keeps working — only Tier 2 queues up.</p>
+        </div>
+      </div>
+
       <div class="actions">
         <button class="btn pri" id="a-replay">▶ Run stream</button>
         <button class="btn" id="a-net">🔌 Go offline</button>
@@ -69,6 +95,9 @@
       <div class="grid g2">
         <div>
           <div class="card"><h3>Spend <span class="r">last 3 months</span></h3>
+            <p class="cx">Computed by a MongoDB <code>$facet</code> pipeline that produces category
+            totals, the monthly trend and top merchants in a <b>single pass</b> over the
+            transaction collection.</p>
             <div class="bars" id="c-bars"><div class="blank">—</div></div><div style="height:14px"></div></div>
 
           <div class="tiles t3">
@@ -81,6 +110,10 @@
           </div>
 
           <div class="card ai"><h3><span class="dia">◆</span> SafeContext AI <span class="r">planner runs on the box</span></h3>
+            <p class="cx">Ask a question and watch what leaves. The local model picks which
+            <b>fields</b> a cloud model needs — it never sees or copies values. Ask a
+            <b>different question about the same record</b> and the payload changes, which is what
+            separates this from a fixed redaction rule.</p>
             <div class="in">
               <p>Ask about spend, vendors, fraud or cash. The planner reads the full record
                  locally and sends an external model only the minimum it needs.</p>
@@ -108,6 +141,9 @@
               <span><i class="bd"></i>p10–p90</span><span><i class="tdy"></i>today</span></div></div>
 
           <div class="card"><h3>Live stream <span class="r" id="stream-state">idle</span></h3>
+            <p class="cx">Driven by a MongoDB <b>change stream</b> — the database pushes each new
+            record to the agent. Every row shows which tier handled it. Press
+            <b>Run stream</b> to watch it work.</p>
             <div class="in t scroll"><table>
               <thead><tr><th>time</th><th>merchant</th><th>tier</th><th class="num">amount</th><th class="num">ms</th></tr></thead>
               <tbody id="stream-rows"><tr><td colspan="5" class="blank">no events yet — press Run stream</td></tr></tbody>
@@ -128,6 +164,8 @@
                 SafeContext reviewed every event locally.</p></div></div>
 
           <div class="card"><div class="eyebrow">Needs attention <span class="r" id="att-count"></span></div>
+            <p class="cx">The agent fills this itself — nobody clicks "generate". Each item shows
+            how much context left the box to produce it. Click one to see the exact payload.</p>
             <div id="att-list"><div class="blank">nothing needs a decision</div></div></div>
 
           <div class="card"><h3>Top merchants</h3><div class="in t"><table><tbody id="m-rows">
@@ -140,6 +178,9 @@
 
       <div class="card"><div class="eyebrow">Recent flagged transactions
           <span class="r" id="fl-count"></span></div>
+        <p class="cx">Employee names and card numbers are shown here because this page never
+        leaves your network. The moment anything is sent to a cloud model, they are replaced or
+        removed — compare this table with any payload in <b>Automation</b>.</p>
         <div class="in t scroll"><table><thead><tr><th>date</th><th>merchant</th><th>employee</th>
           <th>category</th><th class="num">amount</th><th>flags</th><th class="num">risk</th></tr></thead>
           <tbody id="fl-rows"><tr><td colspan="7" class="blank">—</td></tr></tbody></table></div></div>
@@ -148,6 +189,9 @@
     <!-- ========================= AUTOMATION ========================= -->
     <section class="page" data-page="automation">
       <h1 class="h1">Automation</h1><p class="sub">Your action inbox — surfaced by the agent, unprompted</p>
+      <p class="lead">These are decisions waiting for a human. The agent found each one on its own
+      while watching the stream. Click any item to see <b>exactly</b> what was sent off the box to
+      reach that conclusion — and everything that was held back.</p>
       <div style="height:16px"></div>
       <div class="grid g11">
         <div class="card"><h3>Open items <span class="r" id="auto-count"></span></h3>
@@ -156,6 +200,9 @@
           <div class="card" id="det-blank"><div class="blank">Select an item to see exactly what left the box.</div></div>
           <div id="det" hidden>
             <div class="card"><h3>Exposure <span class="r" id="d-policy"></span></h3>
+              <p class="cx">Read this left to right: how many pieces of information the agent
+              <b>could</b> have sent, how many it <b>actually</b> sent, and how many of those were
+              sensitive. The third number should be zero.</p>
               <div class="in"><div class="arrow">
                 <div class="n"><b id="d-avail">–</b><span>available</span></div><div class="sep">→</div>
                 <div class="n"><b id="d-sent">–</b><span>sent</span></div><div class="sep">·</div>
@@ -175,6 +222,9 @@
             <div class="card"><h3>Payload that left the box <span class="r" id="d-bytes"></span></h3>
               <pre id="d-pre">–</pre></div>
             <div class="card"><h3>What was withheld <span class="r" id="d-cnt"></span></h3>
+              <p class="cx">Every field, and who decided. <b>[catalog]</b> means a hard rule that no
+              policy or AI can override. <b>[policy]</b> means a MongoDB document said no.
+              <b>[agent]</b> means the local model judged it unnecessary.</p>
               <div class="in t scroll"><table><thead><tr><th>field</th><th>decision</th>
                 <th>sensitivity</th><th>reason</th></tr></thead><tbody id="d-rows"></tbody></table></div></div>
           </div>
@@ -185,6 +235,9 @@
     <!-- ========================== CONTROLS ========================== -->
     <section class="page" data-page="controls">
       <h1 class="h1">Controls</h1><p class="sub">Retrieval that changes behaviour — edit a document, not the code</p>
+      <p class="lead">These rules decide what may leave the box. They are ordinary MongoDB
+      documents, so changing who someone is — or what their role may see — takes effect on the
+      <b>very next</b> escalation. Try the <b>Role</b> button on the home page and watch a payload change.</p>
       <div style="height:16px"></div>
       <div class="card"><h3>Policies <span class="r">stored in MongoDB</span></h3>
         <div class="in"><p class="muted" style="margin:0">Flip the role or edit a policy and the
@@ -200,6 +253,9 @@
     <!-- =========================== MONGODB ========================== -->
     <section class="page" data-page="mongo">
       <h1 class="h1">MongoDB</h1><p class="sub">The database is the runtime, not a store</p>
+      <p class="lead">MongoDB does not just hold this data — it <b>drives</b> the agent. Change
+      streams wake it up, aggregation pipelines do the analysis, and the agent's own memory lives
+      in a collection so it can survive being killed. None of this works as a JSON file.</p>
       <div style="height:16px"></div>
       <div class="grid g11">
         <div class="card"><h3>The agent survives its own sandbox</h3>
@@ -235,24 +291,28 @@
 
     <!-- ===================== simple stub pages ====================== -->
     <section class="page" data-page="payables"><h1 class="h1">Payables</h1>
-      <p class="sub">Scheduled vendor payments — the invoice stream</p><div style="height:16px"></div>
+      <p class="sub">Scheduled vendor payments — the invoice stream</p>
+      <p class="lead">Invoices are where fraud arrives. The agent reads every body locally, and flags any that try to give it instructions — a real vendor never writes "ignore previous instructions" on an invoice, so the attempt is itself evidence.</p><div style="height:16px"></div>
       <div class="card"><div class="in t"><table><thead><tr><th>invoice</th><th>vendor</th>
         <th class="num">amount</th><th>scheduled</th><th>injection</th><th>status</th></tr></thead>
         <tbody id="pay-rows"></tbody></table></div></div></section>
 
     <section class="page" data-page="expenses"><h1 class="h1">Expenses</h1>
-      <p class="sub">Card transactions — the event stream</p><div style="height:16px"></div>
+      <p class="sub">Card transactions — the event stream</p>
+      <p class="lead">Every one of these was reasoned about by the agent on the box. Risk scores come from a deterministic ensemble, not a model, so they are reproducible and auditable.</p><div style="height:16px"></div>
       <div class="card"><div class="in t scroll"><table><thead><tr><th>date</th><th>merchant</th>
         <th>category</th><th class="num">amount</th><th>flags</th><th class="num">risk</th></tr></thead>
         <tbody id="exp-rows"></tbody></table></div></div></section>
 
     <section class="page" data-page="cards"><h1 class="h1">Cards</h1>
-      <p class="sub">PANs are catalog-floored — they can never leave the box</p><div style="height:16px"></div>
+      <p class="sub">PANs are catalog-floored — they can never leave the box</p>
+      <p class="lead">Full card numbers exist in the database, but the server strips them before they even reach this browser, and no AI request can ever include one. That rule sits below policy: nothing can switch it off.</p><div style="height:16px"></div>
       <div class="card"><div class="in t"><table><thead><tr><th>card</th><th>holder</th>
         <th class="num">limit</th><th>status</th></tr></thead><tbody id="card-rows"></tbody></table></div></div></section>
 
     <section class="page" data-page="treasury"><h1 class="h1">Treasury</h1>
-      <p class="sub">Cash, burn and runway — MNPI, banded before any escalation</p><div style="height:16px"></div>
+      <p class="sub">Cash, burn and runway — MNPI, banded before any escalation</p>
+      <p class="lead">Pre-release financials are material non-public information. Your team sees exact figures; a cloud model only ever sees a range like "$1M–$5M", which is enough to reason with and useless to leak.</p><div style="height:16px"></div>
       <div class="tiles" id="tre-tiles"></div></section>
 
     <section class="page" data-page="research"><h1 class="h1">Research</h1>
