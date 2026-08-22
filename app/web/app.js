@@ -41,9 +41,11 @@ async function health(){
     $('#modelsel').className='modelsel'+(m?'':' off');
     paint(h.agent.counters);
     $('#stream-state').textContent=h.agent.running?'watching':'stopped';
-    if(!h.mongo.replica_set)banner('MongoDB unreachable — serving the seeded dataset from '
-      +'memory so the console still renders. Run scripts/setup_mongo.sh for change '
-      +'streams, $graphLookup and the live agent.');
+    const mb=$('#mongo-badge');
+    if(mb){mb.textContent=h.mongo.replica_set?'MongoDB · rs0 live':'MongoDB · setup pending';
+      mb.className='mbadge '+(h.mongo.replica_set?'on':'off');}
+    if(!h.mongo.replica_set)banner('Run scripts/setup_mongo.sh to start MongoDB — change '
+      +'streams, $graphLookup and the live agent come up with it.');
     else if(!m)banner('No local model — tiers 0 and 2 work, tier 1 reasoning is skipped.');
     else banner('');
   }catch(e){banner('API unreachable: '+e.message);}
