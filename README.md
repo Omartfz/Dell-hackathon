@@ -4,7 +4,9 @@ Local **context minimizer** for the Dell GB10 / OpenClaw hackathon.
 
 Given a business task and MongoDB enterprise data, SafeContext produces the **minimum sufficient payload** for an external LLM (Claude, Copilot, …) plus an exposure report. The user copies that payload out themselves. The planner runs **on the GB10 only**.
 
-**GB10 + Claude Code :** [START.md](START.md) — tout sur la box (clone GitHub, pull modèle, build).
+**Vitrine (style shopifyhack) :** ouvrir [site/index.html](site/index.html) — hub, [deck](site/deck.html), [console](site/console.html), [script](site/script.html). Pitch écrit : [docs/pitch/05-pitch.md](docs/pitch/05-pitch.md).
+
+**GB10 + Claude Code :** [START.md](START.md) — tout sur la box.
 
 ## PRDs
 
