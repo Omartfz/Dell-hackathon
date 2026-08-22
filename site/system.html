@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>System · SafeContext</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .wrap { max-width: 720px; }
+    pre { font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 13px; line-height: 1.65; background: var(--surface); box-shadow: var(--shadow-card); border-radius: var(--radius-card); padding: 22px; margin: 24px 0; font-variant-numeric: tabular-nums; }
+    p { color: var(--g600); margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <a class="mark" href="index.html">SafeContext</a>
+    <nav><a href="deck.html">Deck</a><a href="console.html">Console</a><a href="script.html">Script</a></nav>
+    <span class="chip">Design</span>
+  </div>
+  <div class="wrap">
+    <p class="caps">08 · System design</p>
+    <h1 class="display" style="font-size:42px;margin-top:8px">What stays on the box</h1>
+    <pre>task
+  → OpenClaw + local Qwen
+  → MongoDB   whoami · bundle · policy
+  → spec { keep, transform, drop }
+  → minimize()   deterministic
+  → copy-ready JSON
+  → human → Claude</pre>
+    <p>Planner sees the file. <code>minimize()</code> strips. Claude sees the envelope. No Anthropic key in our process. Ticket bodies never outbound. Full note: docs/pitch/08-system-design.md</p>
+  </div>
+</body>
+</html>

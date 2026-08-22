@@ -44,7 +44,7 @@ Script: `scripts/flip_role.py` (or a UI toggle that writes Mongo).
 
 ### Scenario 1 — Churn (hero)
 
-**Say:** “Employees want Claude, but not with the whole CRM.”
+**Say:** “They want Claude for the report. Security blocked the tool. This is the envelope that gets the report out without the leak.”
 
 **Do:** Task = `Analyze why Acme is likely to churn.`
 
@@ -158,6 +158,6 @@ Do not start UI before `minimize()` is tested. Do not start OpenShell policy bef
 
 **Title:** SafeContext — minimum sufficient context for external LLMs  
 
-**Subtitle:** Comparable analysis, without sending the CRM.
+**Subtitle:** The same report, without sending the file.
 
 **Not:** A firewall. **Not:** RAG.
