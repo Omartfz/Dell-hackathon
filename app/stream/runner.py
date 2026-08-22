@@ -87,8 +87,21 @@ class StreamRunner:
             return False
 
     async def state(self) -> dict[str, Any]:
-        doc = await adb().agent_state.find_one({"_id": STATE_ID}) or {}
+        # /api/health is exactly what you call when Mongo is unreachable, so this
+        # must never raise. Report what is known and say the rest is unavailable.
+        try:
+            doc = await adb().agent_state.find_one({"_id": STATE_ID}) or {}
+        except Exception as exc:
+            return {
+                "running": self.running, "online": self.online,
+                "counters": dict(self.counters), "checkpoints": None,
+                "last_event_id": None, "has_resume_token": None,
+                "started_at": self._started_at.isoformat() if self._started_at else None,
+                "last_error": self._last_error or f"mongo unavailable: {exc}",
+                "mongo_reachable": False,
+            }
         return {
+            "mongo_reachable": True,
             "running": self.running,
             "online": self.online,
             "counters": dict(self.counters),
