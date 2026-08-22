@@ -1,0 +1,287 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Aside v1.0. Source: site/design-system-prompt.md
+   shadcn tokens live underneath, Aside tokens win. No dark mode by design. */
+:root {
+  --ink: #0a0a0a;
+  --ink-2: #3a3a3a;
+  --muted: #6b6b6b;
+  --faint: #9a9a9a;
+  --line: #eaeaea;
+  --line-2: #f2f2f2;
+  --surface: #f7f7f8;
+  --surface-2: #f7f9fb;
+  --accent: #1b6ef3;
+  --accent-dark: #0f4fbf;
+  --accent-tint: #eaf1fe;
+  --success: #3f9a63;
+  --success-ink: #3f7a56;
+  --success-tint: #e4f3ea;
+  --warn: #c98a2e;
+  --warn-tint: #fbf1e2;
+  --danger: #c6453d;
+  --danger-tint: #fbe9e8;
+  --border-input: #dcdcdc;
+  --page: #ffffff;
+  --disabled-bg: #f0f0f0;
+  --disabled-text: #b4b4b4;
+  --mono-quiet: #b0b0b0;
+
+  --shadow-raised: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.06);
+  --shadow-overlay: 0 8px 32px rgba(16, 24, 40, 0.12), 0 2px 6px rgba(16, 24, 40, 0.06);
+  --shadow-bubble: 0 6px 18px rgba(16, 24, 40, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+
+  /* shadcn semantics, pointed at Aside values */
+  --background: var(--page);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink);
+  --muted-foreground: var(--muted);
+  --accent-foreground: #ffffff;
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--border-input);
+  --ring: var(--accent);
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-tint: var(--accent-tint);
+  --color-success: var(--success);
+  --color-success-ink: var(--success-ink);
+  --color-success-tint: var(--success-tint);
+  --color-warn: var(--warn);
+  --color-warn-tint: var(--warn-tint);
+  --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+  --color-border-input: var(--border-input);
+  --color-page: var(--page);
+  --color-disabled-bg: var(--disabled-bg);
+  --color-disabled-text: var(--disabled-text);
+  --color-mono-quiet: var(--mono-quiet);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+  --font-heading: var(--font-instrument-sans), system-ui, sans-serif;
+
+  --shadow-raised: var(--shadow-raised);
+  --shadow-overlay: var(--shadow-overlay);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    @apply font-sans;
+  }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+}
+
+::selection {
+  background: var(--accent-tint);
+}
+
+/* Ambient wash for product pages: three blurred orbs behind everything */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background: var(--page);
+  overflow: hidden;
+}
+.ambient span {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.75;
+}
+.orb-sky {
+  width: 42rem;
+  height: 42rem;
+  top: -12rem;
+  left: -10rem;
+  background: linear-gradient(180deg, #bfe0ff 0%, #e9f4ff 60%, #fff 100%);
+}
+.orb-blush {
+  width: 38rem;
+  height: 38rem;
+  top: 22%;
+  right: -12rem;
+  background: linear-gradient(135deg, #f7d9e6 0%, #f3e3d6 55%, #efe9f6 100%);
+}
+.orb-mist {
+  width: 40rem;
+  height: 40rem;
+  bottom: -16rem;
+  left: 35%;
+  background: linear-gradient(135deg, #cfe7fa 0%, #e4f1fb 100%);
+}
+
+/* Marketing hero sky. No photo asset in the repo, so the clouds are layered
+   radial gradients drifting the way a background-position would. */
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background-color: #7ec8f5;
+  background-image:
+    radial-gradient(38% 28% at 18% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(30% 22% at 42% 18%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(46% 30% at 74% 34%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 64%),
+    radial-gradient(34% 24% at 92% 14%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(50% 34% at 55% 62%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 66%),
+    linear-gradient(180deg, #59b6ee 0%, #9ad7f7 46%, #d9f0fd 100%);
+  background-size: cover;
+  background-position: center top;
+  animation: sky-drift 60s ease-in-out infinite alternate;
+}
+.sky::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 24vh;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 100%);
+}
+@keyframes sky-drift {
+  to {
+    background-position: 58% top;
+  }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: var(--shadow-raised);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.glass-bar {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-overlay);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.mono-eyebrow {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.mono-micro {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+}
+
+/* 7px live dot: accent pulses while working, semantic color once settled */
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--accent);
+  flex: none;
+}
+.dot-live {
+  animation: dot-pulse 1.4s ease-in-out infinite;
+}
+.dot-success {
+  background: var(--success);
+}
+.dot-warn {
+  background: var(--warn);
+}
+.dot-danger {
+  background: var(--danger);
+}
+@keyframes dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.32;
+  }
+}
+
+.rise {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: rise 0.45s ease-out forwards;
+}
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .sky {
+    animation: none !important;
+  }
+}
