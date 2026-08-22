@@ -22,7 +22,7 @@
     <span class="chip">Spoken words</span>
   </div>
   <article>
-    <p class="caps">07 · Script · ~4:00 · one voice</p>
+    <p class="caps">07 · Script · ~4:30 · one voice</p>
     <h1>SafeContext</h1>
     <p style="color:var(--g600)">Verbatim. Staging lives in docs/pitch/06-slide-plan.md. Deck at deck.html.</p>
 
@@ -33,22 +33,26 @@
     <div class="sl"><h2>3 · Institutions run on privacy.</h2>
       <blockquote>Banks, hospitals, insurers. Client names, patient records, account numbers, exact balances, internal memos. That is the job.</blockquote></div>
     <div class="sl"><h2>4 · So they never start.</h2>
-      <blockquote>The tool is blocked on day one. Most firms never ship their own frontier model. The report stays manual.</blockquote></div>
-    <div class="sl"><h2>5 · A filter between you and the model.</h2>
-      <blockquote>We sit between Bob and Claude. We strip the sensitive fields and shrink the context so the same summary still works.</blockquote></div>
+      <blockquote>The tool is blocked on day one. Most firms never ship their own frontier model, and the internal one is slower and worse. The report stays manual.</blockquote></div>
+    <div class="sl"><h2>5 · A layer between you and the model.</h2>
+      <blockquote>We sit between you and the cloud. On the left you have everything. In the middle, the Dell GB10 keeps, transforms, and removes. On the right, the model gets an envelope. Nothing else in your workflow changes.</blockquote></div>
     <div class="sl"><h2>6 · Names change. Numbers change.</h2>
-      <blockquote>Identifiers become tokens. Exact figures become bands. The model still writes the summary. It does not see Jane Doe or the raw spreadsheet. The private view never leaves.</blockquote></div>
-    <div class="sl"><h2>7 · Bob has 20 spreadsheets.</h2>
+      <blockquote>Identifiers become tokens. Exact figures become bands. The private view never leaves.</blockquote></div>
+    <div class="sl"><h2>7 · The document</h2>
+      <blockquote>Here is the same client file. Jane Doe becomes CLIENT_01. The account number becomes a handle. Eight hundred and forty-seven thousand becomes a band. The transfer becomes an order of magnitude. The confidential note simply does not travel.</blockquote></div>
+    <div class="sl"><h2>8 · What leaves the box</h2>
+      <blockquote>That is the whole payload. Enough to write the summary. Not enough to identify anyone.</blockquote></div>
+    <div class="sl"><h2>9 · Bob has 20 spreadsheets.</h2>
       <blockquote>Bob works in a bank. Twenty Excel files just landed. The meeting is at 9.</blockquote></div>
-    <div class="sl"><h2>8 · He wants Claude.</h2>
-      <blockquote>He would paste them into Claude in a second. Privacy policy says no.</blockquote></div>
-    <div class="sl"><h2>9 · The files stay on the GB10.</h2>
-      <blockquote>He pastes an envelope, not the workbooks. The files never leave the box. The summary still gets written.</blockquote></div>
-    <div class="sl"><h2>10 · Mongo holds the record.</h2>
+    <div class="sl"><h2>10 · He wants Claude.</h2>
+      <blockquote>He would paste them into Claude in a second. The privacy policy says no.</blockquote></div>
+    <div class="sl"><h2>11 · The files stay on the GB10.</h2>
+      <blockquote>He pastes an envelope, not the workbooks. The files never leave the box. The summary still gets written, and he makes his meeting.</blockquote></div>
+    <div class="sl"><h2>12 · Mongo holds the record.</h2>
       <blockquote>MongoDB is the system of record. OpenClaw and local Qwen propose KEEP, TRANSFORM, REMOVE. Python minimize executes. Policy wins if they disagree.</blockquote></div>
-    <div class="sl"><h2>11 · System</h2>
-      <blockquote>Let them read the diagram, then: OpenClaw, Mongo, minimize, copy. NemoClaw on the Dell GB10. Nothing else has to be true for the demo. On the box, Bob's spreadsheets are a customer record in Mongo. Same idea.</blockquote></div>
-    <div class="sl"><h2>12 · SafeContext</h2>
+    <div class="sl"><h2>13 · System</h2>
+      <blockquote>Everything in the dashed box runs on the Dell GB10. One arrow crosses it, and a human presses copy. On the demo box, Bob's spreadsheets are a customer record in Mongo. Same idea.</blockquote></div>
+    <div class="sl"><h2>14 · SafeContext</h2>
       <blockquote>Ask for more. Send less. More safety.</blockquote></div>
   </article>
 </body>

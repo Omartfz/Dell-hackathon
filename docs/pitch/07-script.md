@@ -2,7 +2,7 @@
 
 Spoken words only. Staging in [06-slide-plan.md](06-slide-plan.md). Also at `site/script.html`.
 
-~4:00 · one voice. Short declaratives on 1-4; longer on 5-11.
+~4:30 · one voice. Short declaratives on 1-4. Let the diagrams on 5, 7, 9, and 13 breathe.
 
 **1** · Ask for more. Send less. More safety.
 
@@ -18,36 +18,44 @@ Spoken words only. Staging in [06-slide-plan.md](06-slide-plan.md). Also at `sit
 
 **4** · So they never start.
 
-> The tool is blocked on day one. Most firms never ship their own frontier model. The report stays manual.
+> The tool is blocked on day one. Most firms never ship their own frontier model, and the internal one is slower and worse. The report stays manual.
 
-**5** · A filter between you and the model.
+**5** · A layer between you and the model.
 
-> We sit between Bob and Claude. We strip the sensitive fields and shrink the context so the same summary still works.
+> We sit between you and the cloud. On the left you have everything. In the middle, the Dell GB10 keeps, transforms, and removes. On the right, the model gets an envelope. Nothing else in your workflow changes.
 
 **6** · Names change. Numbers change.
 
-> Identifiers become tokens. Exact figures become bands. The model still writes the summary. It does not see Jane Doe or the raw spreadsheet. The private view never leaves.
+> Identifiers become tokens. Exact figures become bands. The private view never leaves.
 
-**7** · Bob has 20 spreadsheets.
+**7** · The document
+
+> Here is the same client file. Jane Doe becomes CLIENT_01. The account number becomes a handle. Eight hundred and forty-seven thousand becomes a band. The transfer becomes an order of magnitude. The confidential note simply does not travel.
+
+**8** · What leaves the box
+
+> That is the whole payload. Enough to write the summary. Not enough to identify anyone.
+
+**9** · Bob has 20 spreadsheets.
 
 > Bob works in a bank. Twenty Excel files just landed. The meeting is at 9.
 
-**8** · He wants Claude.
+**10** · He wants Claude.
 
-> He would paste them into Claude in a second. Privacy policy says no.
+> He would paste them into Claude in a second. The privacy policy says no.
 
-**9** · The files stay on the GB10.
+**11** · The files stay on the GB10.
 
-> He pastes an envelope, not the workbooks. The files never leave the box. The summary still gets written.
+> He pastes an envelope, not the workbooks. The files never leave the box. The summary still gets written, and he makes his meeting.
 
-**10** · Mongo holds the record.
+**12** · Mongo holds the record.
 
 > MongoDB is the system of record. OpenClaw and local Qwen propose KEEP, TRANSFORM, REMOVE. Python minimize executes. Policy wins if they disagree.
 
-**11** · System
+**13** · System
 
-> Let them read the diagram, then: OpenClaw, Mongo, minimize, copy. NemoClaw on the Dell GB10. Nothing else has to be true for the demo. On the box, Bob's spreadsheets are a customer record in Mongo. Same idea.
+> Everything in the dashed box runs on the Dell GB10. One arrow crosses it, and a human presses copy. On the demo box, Bob's spreadsheets are a customer record in Mongo. Same idea.
 
-**12** · SafeContext
+**14** · SafeContext
 
 > Ask for more. Send less. More safety.
