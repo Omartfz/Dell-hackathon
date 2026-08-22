@@ -231,3 +231,7 @@ pre{margin:0;padding:14px 16px;overflow:auto;background:#fbfcfd;font-size:11.5px
 .cx code{background:#f4f5f7;padding:1px 5px;border-radius:4px;font-size:11.5px}
 .lead{margin:8px 0 0;font-size:13.5px;line-height:1.6;color:var(--ink-2);max-width:860px}
 .lead b{color:var(--ink);font-weight:600}
+.mbadge{font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);
+  color:var(--ink-2);white-space:nowrap}
+.mbadge.on{background:var(--green-bg);border-color:#c6e6d3;color:#0b6b3d;font-weight:560}
+.mbadge.off{background:var(--amber-bg);border-color:#f2ddb8;color:#8a5a10}

@@ -160,6 +160,9 @@ atomically.
 
 All of it visible on the **MongoDB** screen in the app.
 
+> **Explaining this to a judge or mentor:** [MONGODB.md](MONGODB.md) has the script — three
+> criteria, one live command each, under four minutes.
+
 ---
 
 ## The security argument, in one file
