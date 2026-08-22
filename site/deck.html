@@ -13,7 +13,6 @@
     .layer { position: absolute; inset: 0; pointer-events: none; }
     .stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 8vh 6vw 14vh; }
     .scene { width: min(1100px, 100%); text-align: center; }
-    .scene.left { text-align: left; }
     .label {
       position: absolute; bottom: 7vh; left: 6vw;
       font-size: 2.6vmin; font-weight: 500; letter-spacing: -0.02em;
@@ -29,32 +28,12 @@
     .h2 {
       font-size: 6.6vmin; font-weight: 600; letter-spacing: -0.02em; line-height: 1.12;
     }
-    .num {
-      font-size: 13.5vmin; font-weight: 700; letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums lining-nums;
-    }
-    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4vmin; margin-top: 4vmin; text-align: left; }
-    .tile {
-      background: var(--surface);
-      border-radius: var(--radius-card);
-      box-shadow: var(--shadow-card);
-      padding: 3.2vmin;
-      min-height: 28vmin;
-      display: flex;
-      flex-direction: column;
-    }
-    .track {
-      margin-top: auto;
-      height: 10px;
-      background: var(--g200);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .fill {
-      height: 100%;
-      width: 0;
-      background: var(--ink);
-      transition: width 1.05s var(--ease);
+    .sub {
+      margin-top: 2.4vmin;
+      font-size: 2.8vmin;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--g600);
     }
     .enter {
       opacity: 0; transform: translateY(10px);
@@ -75,17 +54,46 @@
       box-shadow: var(--shadow-raised);
     }
     .fade-scene { animation: sceneIn 0.35s ease-out; }
-    @keyframes rise {
-      to { opacity: 1; transform: none; }
+    .names {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.6vmin 3.2vmin;
+      margin-top: 4.4vmin;
     }
-    @keyframes fade { to { opacity: 1; } }
-    @keyframes sceneIn { from { opacity: 0; } to { opacity: 1; } }
+    .names span {
+      font-size: 4.4vmin;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: rise 0.9s var(--ease) forwards;
+    }
+    .list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.1vmin;
+    }
+    .list .enter-line {
+      font-size: 4.4vmin;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
     .arch {
       font-size: 2.2vmin; line-height: 1.65; text-align: left;
       font-variant-numeric: tabular-nums;
       display: inline-block;
     }
-    @media (max-width: 700px) { .pair { grid-template-columns: 1fr; } }
+    @keyframes rise {
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes fade { to { opacity: 1; } }
+    @keyframes sceneIn { from { opacity: 0; } to { opacity: 1; } }
+    @media (max-width: 700px) {
+      .names span { font-size: 5.4vmin; }
+    }
   </style>
 </head>
 <body>
@@ -99,30 +107,34 @@
     <div class="pos tnum" id="pos"></div>
   </div>
   <script>
-    const EASE = "cubic-bezier(0.19, 1, 0.22, 1)";
-    const LAST = 15;
-    const GROUP = { 1:"s1",2:"s2",3:"s3",4:"s4",5:"s4",6:"s6",7:"s7",8:"s8",9:"s8",10:"s10",11:"s11",12:"s12",13:"s13",14:"s14",15:"s15" };
+    const LAST = 12;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     let n = 1;
     let idleTimer;
 
     const LABELS = {
-      1: "The report is due tomorrow.",
-      2: "Everyone wants Claude.",
-      3: "The tools get blocked.",
-      4: "Same report. Sensitive-free.",
-      5: "Same report. Sensitive-free.",
-      6: "It is the same analysis.",
-      7: "KEEP · TRANSFORM · REMOVE",
-      8: "Magnitude is enough.",
-      9: "Magnitude is enough.",
-      10: "Change Mongo. The payload changes.",
-      11: "Qwen sees the file. Claude sees the envelope.",
-      12: "The system",
-      13: "Three jobs. One record.",
-      14: "Copy. Then use Claude.",
-      15: "SafeContext"
+      1: "Ask for more. Send less. More safety.",
+      2: "Everyone wants the new tools.",
+      3: "Institutions run on privacy.",
+      4: "So they never start.",
+      5: "A filter between you and the model.",
+      6: "Names change. Numbers change.",
+      7: "Bob has 20 spreadsheets.",
+      8: "He wants Claude.",
+      9: "The files stay on the GB10.",
+      10: "Mongo holds the record.",
+      11: "The system",
+      12: "SafeContext"
     };
+
+    const TOOLS = ["Claude Code", "Cowork", "Codex", "Copilot", "ChatGPT", "Gemini"];
+    const CONSTRAINTS = [
+      "Client PII",
+      "Patient records",
+      "Account numbers",
+      "Exact balances",
+      "Internal memos"
+    ];
 
     function el(html) {
       const d = document.createElement("div");
@@ -131,84 +143,82 @@
       return d;
     }
 
+    function late() {
+      return reduced ? "0s" : "2.4s";
+    }
+
     function render() {
       const stage = document.getElementById("stage");
-      const prevGroup = stage.dataset.group;
-      const group = GROUP[n];
       document.getElementById("label").textContent = LABELS[n];
       document.getElementById("pos").textContent = n + " / " + LAST;
       history.replaceState(null, "", "#" + n);
-
-      if (prevGroup === group && (n === 4 || n === 5 || n === 8 || n === 9)) {
-        build(n);
-        return;
-      }
-      stage.dataset.group = group;
       stage.innerHTML = "";
-      const scene = sceneFor(n);
-      stage.appendChild(scene);
-      if (n === 5 || n === 9) build(n);
-      if (n === 4) build(4);
-      if (n === 8) build(8);
+      stage.appendChild(sceneFor(n));
     }
 
     function sceneFor(n) {
       if (n === 1) {
-        const s = el(`<div class="glass enter"><div class="h">The report is due tomorrow.</div></div>`);
-        s.classList.add("scene");
-        return s;
+        return el(`<div class="glass enter">
+          <div class="caps" style="margin-bottom:2.2vmin;letter-spacing:0.22em">SafeContext</div>
+          <div class="h">Ask for more.<br />Send less.<br />More safety.</div>
+        </div>`);
       }
       if (n === 2) {
-        const s = el(`<div class="h2 enter-line">Everyone wants Claude.</div>
-          <div class="h2 enter-line" id="l2" style="margin-top:0.4em">Security says no.</div>`);
-        s.querySelector("#l2").style.animationDelay = reduced ? "0s" : "2.4s";
-        return s;
+        const chips = TOOLS.map((name, i) => {
+          const delay = reduced ? "0s" : (0.18 + i * 0.12) + "s";
+          return `<span style="animation-delay:${delay}">${name}</span>`;
+        }).join("");
+        return el(`<div class="h2 enter-line">Everyone wants the new tools.</div>
+          <div class="names">${chips}</div>`);
       }
       if (n === 3) {
-        const s = el(`<div class="h2 enter-line">They block the tool.</div>
-          <div class="h2 enter-line" id="l3" style="margin-top:0.4em">They do not build a better one.</div>`);
-        s.querySelector("#l3").style.animationDelay = reduced ? "0s" : "2.4s";
+        const rows = CONSTRAINTS.map((line, i) => {
+          const delay = reduced ? "0s" : (0.15 + i * 0.22) + "s";
+          return `<div class="enter-line" style="animation-delay:${delay}">${line}</div>`;
+        }).join("");
+        return el(`<div class="list">${rows}</div>`);
+      }
+      if (n === 4) {
+        const s = el(`<div class="h2 enter-line">So they never start.</div>
+          <div class="h2 enter-line" id="l4" style="margin-top:0.4em">The tool is blocked on day one.</div>`);
+        s.querySelector("#l4").style.animationDelay = late();
         return s;
       }
-      if (n === 4 || n === 5) {
-        return el(`<div class="pair">
-          <div class="tile enter" style="animation-delay:0.1s">
-            <p class="caps">The whole file</p>
-            <div class="num" id="nL" style="font-size:8vmin"> </div>
-            <p style="color:var(--g500);font-size:1.8vmin;margin-top:1vmin" id="cL">What people paste today</p>
-            <div class="track"><div class="fill" id="fL"></div></div>
-          </div>
-          <div class="tile enter" style="animation-delay:0.22s">
-            <p class="caps">SafeContext</p>
-            <div class="num" id="nR" style="font-size:8vmin"> </div>
-            <p style="color:var(--g500);font-size:1.8vmin;margin-top:1vmin" id="cR">What the report needs</p>
-            <div class="track"><div class="fill" id="fR"></div></div>
-          </div>
-        </div>`);
+      if (n === 5) {
+        return el(`<div class="h enter">A filter between you and the model.</div>`);
       }
       if (n === 6) {
-        return el(`<div class="h enter">It is the same analysis.</div>`);
+        const s = el(`<div class="h2 enter-line">Names change. Numbers change.</div>
+          <div class="h2 enter-line" id="l6" style="margin-top:0.4em">The private view never leaves.</div>`);
+        s.querySelector("#l6").style.animationDelay = late();
+        return s;
       }
       if (n === 7) {
-        return el(`<div class="h2 enter-line">KEEP</div>
-          <div class="h2 enter-line" style="margin-top:0.2em;animation-delay:0.55s">TRANSFORM</div>
-          <div class="h2 enter-line" style="margin-top:0.2em;animation-delay:1.1s">REMOVE</div>`);
+        const s = el(`<div class="h2 enter-line">Bob has 20 spreadsheets.</div>
+          <div class="h2 enter-line" id="l7" style="margin-top:0.4em">The meeting is at 9.</div>`);
+        s.querySelector("#l7").style.animationDelay = late();
+        return s;
       }
-      if (n === 8 || n === 9) {
-        return el(`<div class="num enter" id="arr">$847,291</div>
-          <p class="caps" id="arrsub" style="margin-top:2vmin;opacity:0">exact figure in the file</p>`);
+      if (n === 8) {
+        const s = el(`<div class="h2 enter-line">He wants Claude.</div>
+          <div class="h2 enter-line" id="l8" style="margin-top:0.4em">Policy says no.</div>`);
+        s.querySelector("#l8").style.animationDelay = late();
+        return s;
+      }
+      if (n === 9) {
+        const s = el(`<div class="h2 enter-line">The files stay on the GB10.</div>
+          <div class="h2 enter-line" id="l9" style="margin-top:0.4em">The summary still gets written.</div>`);
+        s.querySelector("#l9").style.animationDelay = late();
+        return s;
       }
       if (n === 10) {
-        return el(`<div class="h2 enter-line">analyst</div>
-          <div class="h2 enter-line" style="margin-top:0.3em;color:var(--g500);animation-delay:0.7s">then manager</div>`);
-      }
-      if (n === 11) {
-        return el(`<div class="pair">
-          <div class="tile enter"><p class="caps">GB10</p><div style="font-size:3.4vmin;font-weight:600;letter-spacing:-0.02em;margin-top:1vmin">Qwen sees the file</div></div>
-          <div class="tile enter" style="animation-delay:0.18s"><p class="caps">Off box</p><div style="font-size:3.4vmin;font-weight:600;letter-spacing:-0.02em;margin-top:1vmin">Claude sees the envelope</div></div>
+        return el(`<div class="list">
+          <div class="enter-line">MongoDB holds the record.</div>
+          <div class="enter-line" style="animation-delay:${reduced ? "0s" : "0.55s"}">OpenClaw + Qwen propose KEEP, TRANSFORM, REMOVE.</div>
+          <div class="enter-line" style="animation-delay:${reduced ? "0s" : "1.1s"}">minimize() executes. Policy wins.</div>
         </div>`);
       }
-      if (n === 12) {
+      if (n === 11) {
         return el(`<pre class="arch enter">task
   → OpenClaw + local Qwen
   → MongoDB   whoami · bundle · policy
@@ -217,86 +227,8 @@
   → copy-ready JSON
   → you → Claude</pre>`);
       }
-      if (n === 13) {
-        return el(`<div class="h2 enter-line">The report.</div>
-          <div class="h2 enter-line" style="margin-top:0.2em;animation-delay:0.55s">The email.</div>
-          <div class="h2 enter-line" style="margin-top:0.2em;animation-delay:1.1s">Flip the role.</div>`);
-      }
-      if (n === 14) {
-        return el(`<div class="h enter">Copy. Then use Claude.</div>`);
-      }
       return el(`<div class="h enter">SafeContext</div>
-        <p class="caps enter" style="margin-top:2.4vmin;animation-delay:0.45s;letter-spacing:0.14em">Prompt the model. Keep the leak on the box.</p>`);
-    }
-
-    function count(el, to, ms) {
-      if (!el) return;
-      if (reduced) { el.textContent = String(to); return; }
-      const t0 = performance.now();
-      function tick(now) {
-        const p = Math.min(1, (now - t0) / ms);
-        const e = 1 - Math.pow(1 - p, 3);
-        el.textContent = String(Math.round(e * to));
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-
-    function build(slide) {
-      if (slide === 4) {
-        const nL = document.getElementById("nL");
-        const nR = document.getElementById("nR");
-        const fL = document.getElementById("fL");
-        const fR = document.getElementById("fR");
-        const cL = document.getElementById("cL");
-        const cR = document.getElementById("cR");
-        if (nL) nL.textContent = "";
-        if (nR) nR.textContent = "";
-        if (fL) fL.style.width = "0";
-        if (fR) fR.style.width = "0";
-        if (cL) cL.textContent = "What people paste today";
-        if (cR) cR.textContent = "What the report needs";
-      }
-      if (slide === 5) {
-        const nL = document.getElementById("nL");
-        const nR = document.getElementById("nR");
-        const fL = document.getElementById("fL");
-        const fR = document.getElementById("fR");
-        const cL = document.getElementById("cL");
-        const cR = document.getElementById("cR");
-        if (cL) cL.textContent = "of 17 information units";
-        if (cR) cR.textContent = "of 17 information units";
-        count(nL, 17, 900);
-        count(nR, 6, 900);
-        requestAnimationFrame(() => {
-          if (fL) fL.style.width = "100%";
-          if (fR) fR.style.width = "35%";
-        });
-      }
-      if (slide === 8) {
-        const arr = document.getElementById("arr");
-        const sub = document.getElementById("arrsub");
-        if (arr) { arr.textContent = "$847,291"; arr.style.opacity = "1"; }
-        if (sub) { sub.textContent = "exact figure in the file"; sub.style.opacity = "1"; }
-      }
-      if (slide === 9) {
-        const arr = document.getElementById("arr");
-        const sub = document.getElementById("arrsub");
-        if (arr) {
-          arr.style.transition = "opacity 0.35s ease-out";
-          arr.style.opacity = "0";
-          setTimeout(() => {
-            arr.textContent = "$500k-$1M";
-            arr.style.opacity = "1";
-            arr.style.animation = "rise 0.9s " + EASE;
-          }, reduced ? 0 : 280);
-        }
-        if (sub) {
-          sub.textContent = "the band the report actually needs";
-          sub.style.transition = "opacity 0.6s " + EASE;
-          sub.style.opacity = "1";
-        }
-      }
+        <p class="sub enter" style="animation-delay:0.45s">Ask for more. Send less. More safety.</p>`);
     }
 
     function go(d) {

@@ -4,66 +4,48 @@
 
 ---
 
+## The hook
+
+SafeContext. Ask for more. Send less. More safety.
+
+The jury should know the topic in one beat: more of the frontier model, less of the file, more safety.
+
+---
+
 ## The need
 
-The report is due tomorrow. The files that would write it sit in a bank, an insurer, anywhere a leak is a career.
+Everyone wants the new tools: Claude Code, Cowork, Codex, Copilot, ChatGPT, Gemini.
 
-People already want the new tools: Claude Code, Claude Cowork, Copilot. They make the analysis faster. Then security blocks them on day one.
-
-Most institutions do not ship their own frontier model. The internal one, if it exists, is slower and worse. So the report is still manual, on a short deadline, because the tool cannot see the file.
+Banks, hospitals, insurers run on constraints: client PII, patient records, account numbers, exact balances, internal memos. New tools land blocked on day one. Most firms never start.
 
 ---
 
 ## The idea
 
-Prompt the model anyway. Keep the sensitive parts on the box.
+A filter between you and the model. It strips sensitive fields and shrinks context so the report still works.
 
-GB10 runs a local agent over MongoDB. What leaves the room is a small envelope: enough for the report, not enough to leak the client.
-
-> Give the model what the task needs. Not the file.
+Names become tokens. Exact figures become bands. The model still writes the summary. It does not see Jane Doe or the raw spreadsheet. The private view never leaves the box.
 
 ---
 
-## The equivalence
+## Bob
 
-Seventeen information units in the seeded record. Six leave the box for the churn report. The write-up still names declining usage, support load, and an upcoming renewal.
+Bob is a bank analyst. Twenty spreadsheets. Meeting at 9. He wants Claude. Policy says no.
 
-| | Whole file | SafeContext |
-|---|---|---|
-| What Claude sees | Every field | Status, ARR **band**, term, renewal, usage trend, ticket **counts** |
-| PII | email, phone | none (this report) |
-| Exact figure | $847,291 | $500k-$1M |
-| Injection ticket body | present | never outbound |
+With SafeContext the files stay on the GB10. He pastes an envelope, not the workbooks. The summary still gets written.
+
+On the demo box, Bob's spreadsheets are a customer record in Mongo. Same idea.
 
 ---
 
-## The mechanism
+## The stack
 
-A **local** agent (OpenClaw + Qwen on the GB10) proposes KEEP / TRANSFORM / REMOVE. Python `minimize()` executes. MongoDB **policy wins**. There is no `call_external_llm` tool. A human copies the envelope into Claude, Copilot, or Cowork.
+MongoDB holds the record. OpenClaw + local Qwen propose KEEP / TRANSFORM / REMOVE. Python `minimize()` executes. Policy wins. A human copies the envelope into Claude.
 
-Unhedged dump: quality maybe high, exposure max. Zero context: 100% reduction, 0% utility. SafeContext is the Pareto point we can show in one run.
-
----
-
-## The product
-
-Two screens:
-
-| Screen | What it shows |
-|---|---|
-| **Console** | Task, naive JSON, copy-ready envelope, decision log, live counts |
-| **Deck** | The argument, 15 slides |
-
-They never give us an Anthropic key. They keep the cloud tool they already wanted.
+There is no `call_external_llm` tool. They never give us an Anthropic key.
 
 ---
 
 ## What has to be true
 
-The minimized answer must still hit the report rubric (usage down, tickets up, renewal). If it cannot, we sent too little. That is a failed run, not a win on reduction %.
-
----
-
-## Where it goes
-
-The wedge is "the report on a deadline, without leaking the file." The primitive is **task-conditioned egress** for any external model.
+The minimized answer must still do the job (the summary, the report). If it cannot, we sent too little. That is a failed run, not a win on reduction.

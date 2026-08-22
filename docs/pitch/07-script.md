@@ -2,64 +2,52 @@
 
 Spoken words only. Staging in [06-slide-plan.md](06-slide-plan.md). Also at `site/script.html`.
 
-~4:00 · one voice. Short declaratives on 1-3; longer on 7-11.
+~4:00 · one voice. Short declaratives on 1-4; longer on 5-11.
 
-**1** · The report is due tomorrow.
+**1** · Ask for more. Send less. More safety.
 
-> You have a deadline. The files that would write the report are sitting in a bank, an insurer, anywhere a leak is a career.
+> SafeContext. You ask the model for more work. You send it less of the file. You get more safety.
 
-**2** · Everyone wants Claude.
+**2** · Everyone wants the new tools.
 
-> Teams already reach for Claude Code, Claude Cowork, Copilot. They make the work faster. Then security turns them off.
+> Claude Code, Cowork, Codex, Copilot, ChatGPT, Gemini. Every team wants the latest one. It makes the report faster.
 
-**3** · The tools get blocked.
+**3** · Institutions run on privacy.
 
-> New tools land blocked. Institutions almost never ship their own frontier model. The internal one, if it exists, is slower and worse. So the report is still done by hand.
+> Banks, hospitals, insurers. Client names, patient records, account numbers, exact balances, internal memos. That is the job.
 
-**4** · Same report. Sensitive-free.
+**4** · So they never start.
 
-> What if you could prompt Claude for that report anyway? Dell GB10 and MongoDB strip the sensitive parts before anything leaves the room.
+> The tool is blocked on day one. Most firms never ship their own frontier model. The report stays manual.
 
-**5** · 17 / 6
+**5** · A filter between you and the model.
 
-> Seventeen information units in the record. Six leave the box. The quality of the report is what we keep, not the fields.
+> We sit between Bob and Claude. We strip the sensitive fields and shrink the context so the same summary still works.
 
-**6** · It is the same analysis.
+**6** · Names change. Numbers change.
 
-> Declining usage. Support load. Upcoming renewal. The write-up still holds. The phone number never had to travel.
+> Identifiers become tokens. Exact figures become bands. The model still writes the summary. It does not see Jane Doe or the raw spreadsheet. The private view never leaves.
 
-**7** · KEEP · TRANSFORM · REMOVE
+**7** · Bob has 20 spreadsheets.
 
-> A local agent proposes a spec. Python executes it. Policy in MongoDB wins if they disagree.
+> Bob works in a bank. Twenty Excel files just landed. The meeting is at 9.
 
-**8** · $847,291 to $500k-$1M
+**8** · He wants Claude.
 
-> Magnitude is enough to write the report. The exact dollar figure is not.
+> He would paste them into Claude in a second. Privacy policy says no.
 
-**9** · (still on the band)
+**9** · The files stay on the GB10.
 
-> That is TRANSFORM. REMOVE is the injection in a ticket body. It never appears in the outbound JSON. There is no tool that can call Claude from our code.
+> He pastes an envelope, not the workbooks. The files never leave the box. The summary still gets written.
 
-**10** · Change Mongo. The payload changes.
+**10** · Mongo holds the record.
 
-> Flip the role from analyst to manager and the same question ships a different envelope. Policy changed behavior.
+> MongoDB is the system of record. OpenClaw and local Qwen propose KEEP, TRANSFORM, REMOVE. Python minimize executes. Policy wins if they disagree.
 
-**11** · Qwen sees the file. Claude sees the envelope.
+**11** · System
 
-> The planner runs on the GB10. You copy the rest into the tool you already wanted. That is the product boundary.
+> Let them read the diagram, then: OpenClaw, Mongo, minimize, copy. NemoClaw on the Dell GB10. Nothing else has to be true for the demo. On the box, Bob's spreadsheets are a customer record in Mongo. Same idea.
 
-**12** · System
+**12** · SafeContext
 
-> Let them read the diagram, then: OpenClaw, Mongo, minimize, copy. Nothing else has to be true for the demo.
-
-**13** · Three jobs. One record.
-
-> The report, then an email, then the role flip. Same record, three payloads.
-
-**14** · Copy. Then use Claude.
-
-> We do not take your Anthropic key. You paste when you want the cloud.
-
-**15** · SafeContext
-
-> Prompt the model. Keep the leak on the box.
+> Ask for more. Send less. More safety.

@@ -2,26 +2,23 @@
 
 **Rendered at** `site/deck.html`. Spoken words: [07-script.md](07-script.md). System: [08-system-design.md](08-system-design.md).
 
-Vocabulary rule: **show the need, then the block, then the mechanism.** Do not say "OpenClaw" before slide 11. Do not name SafeContext before slide 4 (the cards). Do not say CRM.
+Vocabulary rule: **hook, then the block, then Bob, then the stack.** Do not say "OpenClaw" before slide 10. Do not say CRM.
 
-One number per slide except 6 and 12.
+Tool names on slide 2 are Inter text, not brand SVGs.
 
 | # | On screen | Do not show |
 |---|---|---|
-| 1 | The report is due tomorrow. | Logo, product name |
-| 2 | Everyone wants Claude. / Security says no. | Feature list |
-| 3 | They block the tool. / They do not build a better one. | Vendor logos |
-| 4 | Two cards: whole file vs envelope | Architecture |
-| 5 | 17 units / 6 units | Fake 85% |
-| 6 | It is the same analysis. | Extra metrics |
-| 7 | KEEP · TRANSFORM · REMOVE | Code |
-| 8 | $847,291 | Band formula |
-| 9 | $500k-$1M | |
-| 10 | analyst, then manager | Full schema |
-| 11 | Qwen sees the file. Claude sees the envelope. | Cloud logos |
-| 12 | ASCII system | Extra boxes |
-| 13 | The report. The email. Flip the role. | |
-| 14 | Copy. Then use Claude. | TAM |
-| 15 | SafeContext | Live demo URL unless console is up |
+| 1 | SafeContext / Ask for more. Send less. More safety. | Feature list |
+| 2 | Everyone wants the new tools. + name wall | Official logos |
+| 3 | Client PII, patient records, account numbers, exact balances, internal memos | Architecture |
+| 4 | So they never start. / The tool is blocked on day one. | Vendor fear |
+| 5 | A filter between you and the model. | Code |
+| 6 | Names change. Numbers change. / The private view never leaves. | "The LLM is blind" |
+| 7 | Bob has 20 spreadsheets. / The meeting is at 9. | Fake metrics |
+| 8 | He wants Claude. / Policy says no. | |
+| 9 | The files stay on the GB10. / The summary still gets written. | |
+| 10 | MongoDB / OpenClaw + Qwen / minimize() | Extra boxes |
+| 11 | ASCII system | LangGraph, RAG |
+| 12 | SafeContext / Ask for more. Send less. More safety. | TAM |
 
 Advance: `→` or space. Click stage also advances.
