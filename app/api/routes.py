@@ -9,7 +9,7 @@ from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from app.agent import llm, planner
-from app.db import fallback, indexes, queries
+from app.db import bootstrap, fallback, indexes, queries
 from app.db.client import adb, replica_set_ready
 from app.db.seed import seed_sync
 from app.stream.runner import StreamRunner, replay
@@ -115,21 +115,44 @@ async def ask(task: str = Body(..., embed=True),
 
 @router.get("/inbox")
 async def inbox(limit: int = 25):
-    rows = await adb().inbox.find({}).sort("created_at", -1).to_list(limit)
+    """Live items first. If the stream has not run yet, seed the inbox with the
+    escalations the planted cases would produce — computed by the real minimizer,
+    so the payloads and metrics on screen are the genuine article."""
+    async def _m():
+        rows = await adb().inbox.find({}).sort("created_at", -1).to_list(limit)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+    rows, _ = await served_by(_m, lambda: bootstrap.cached()[0])
     return ok(rows)
 
 
 @router.get("/escalations")
 async def escalations(limit: int = 25):
-    rows = await adb().escalations.find({}).sort("created_at", -1).to_list(limit)
+    async def _m():
+        rows = await adb().escalations.find({}).sort("created_at", -1).to_list(limit)
+        if not rows:
+            raise RuntimeError("empty")
+        return rows
+    rows, _ = await served_by(_m, lambda: bootstrap.cached()[1])
     return ok(rows)
 
 
 @router.get("/escalations/{event_id}")
 async def escalation(event_id: str):
-    doc = await adb().escalations.find_one({"event_id": event_id})
-    if not doc:
+    async def _m():
+        doc = await adb().escalations.find_one({"event_id": event_id})
+        if not doc:
+            raise RuntimeError("empty")
+        return doc
+
+    def _fb():
+        for d in bootstrap.cached()[1]:
+            if d["event_id"] == event_id:
+                return d
         raise HTTPException(404, "no such escalation")
+
+    doc, _ = await served_by(_m, _fb)
     return ok(doc)
 
 

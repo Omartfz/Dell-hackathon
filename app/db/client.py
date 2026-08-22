@@ -22,7 +22,7 @@ def adb() -> AsyncIOMotorDatabase:
     if _async_client is None:
         _async_client = AsyncIOMotorClient(
             settings().mongo_uri, tz_aware=True,
-            serverSelectionTimeoutMS=3000, connectTimeoutMS=3000)
+            serverSelectionTimeoutMS=1200, connectTimeoutMS=1200)
     return _async_client[settings().mongo_db]
 
 
@@ -31,7 +31,7 @@ def sdb() -> Database:
     if _sync_client is None:
         _sync_client = MongoClient(
             settings().mongo_uri, tz_aware=True,
-            serverSelectionTimeoutMS=3000, connectTimeoutMS=3000)
+            serverSelectionTimeoutMS=1200, connectTimeoutMS=1200)
     return _sync_client[settings().mongo_db]
 
 
