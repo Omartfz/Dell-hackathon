@@ -6,11 +6,11 @@ Clone GitHub → Claude Code → il installe et il build.
 ## Sur le GB10 uniquement
 
 ```bash
-git clone --branch master https://github.com/Omartfz/Dell-hackathon.git
+git clone https://github.com/Omartfz/Dell-hackathon.git
 cd Dell-hackathon
 ```
 
-> ⚠️ **`master` est la branche de travail.** La branche `docs/prd` n'a **ni** `CLAUDE.md` **ni** `TASKS.md` — un clone par défaut ne suffit pas.
+> `docs/prd` (branche par défaut) et `master` portent toutes les deux `CLAUDE.md`, `TASKS.md` et les PRD. Un clone simple suffit. Si tu veux la pointe du travail : `git checkout master`.
 
 Ouvre **Claude Code dans ce dossier**. Colle :
 
