@@ -9,4 +9,4 @@ Hackathon prototype. Locked 2026-08-22.
 | [03-demo.md](./03-demo.md) | Seed data, four scenarios, rubric, repo layout, build order |
 | [04-gb10.md](./04-gb10.md) | What the box installs vs what you build on-site |
 
-Index of the locked PRD set. App code is built on the GB10 (see [04-gb10.md](./04-gb10.md)).
+Index of the locked PRD set. Hands-on start: [../../START.md](../../START.md). App code is built on the GB10 (see [04-gb10.md](./04-gb10.md)).
