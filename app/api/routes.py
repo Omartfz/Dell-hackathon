@@ -189,9 +189,16 @@ async def update_policy(policy_id: str, patch: dict = Body(...)):
 async def mongo_status():
     db = adb()
     rs_ok, rs_msg = await replica_set_ready()
-    names = await db.list_collection_names()
-    counts = {n: await db[n].estimated_document_count() for n in sorted(names)}
-    state = await db.agent_state.find_one({"_id": "stream"}) or {}
+    try:
+        names = await db.list_collection_names()
+        counts = {n: await db[n].estimated_document_count() for n in sorted(names)}
+        state = await db.agent_state.find_one({"_id": "stream"}) or {}
+    except Exception as exc:
+        return ok({"replica_set": {"ready": False, "detail": f"{rs_msg} ({exc})"},
+                   "collections": {}, "total_documents": 0,
+                   "change_stream": {"watching": ["transactions", "invoices"],
+                                     "checkpoints": 0, "last_event_id": None,
+                                     "resume_token_stored": False}})
     return ok({
         "replica_set": {"ready": rs_ok, "detail": rs_msg},
         "collections": counts,
@@ -271,3 +278,52 @@ async def reseed():
     counts = seed_sync(sdb())
     indexes.ensure_sync(sdb())
     return ok({"seeded": counts, "total": sum(counts.values())})
+
+
+# --------------------------------------------------------------------------- #
+# console screens
+# --------------------------------------------------------------------------- #
+
+@router.get("/treasury")
+async def treasury():
+    doc = await adb().treasury.find_one({"_id": "tre_current"})
+    if not doc:
+        raise HTTPException(404, "no treasury snapshot")
+    return ok(doc)
+
+
+@router.get("/catalog")
+async def catalog_rows():
+    rows = await adb().field_catalog.find({}).to_list(200)
+    return ok(sorted(rows, key=lambda r: r.get("field_id", "")))
+
+
+@router.get("/payables")
+async def payables(limit: int = 30):
+    db = adb()
+    rows = await db.invoices.aggregate([
+        {"$lookup": {"from": "vendors", "localField": "vendor_id",
+                     "foreignField": "_id", "as": "v"}},
+        {"$addFields": {"vendor_name": {"$first": "$v.name"}}},
+        {"$project": {"v": 0, "body": 0}},      # bodies never reach the browser either
+        {"$sort": {"scheduled_at": 1}}, {"$limit": limit},
+    ]).to_list(limit)
+    return ok(rows)
+
+
+@router.get("/transactions")
+async def transactions(limit: int = 80):
+    rows = await adb().transactions.find({}).sort("ts", -1).to_list(limit)
+    return ok(rows)
+
+
+@router.get("/cards")
+async def cards():
+    """PANs are stripped server-side — the console never receives one."""
+    rows = await adb().cards.aggregate([
+        {"$lookup": {"from": "employees", "localField": "holder_id",
+                     "foreignField": "_id", "as": "e"}},
+        {"$addFields": {"holder_name": {"$first": "$e.name"}}},
+        {"$project": {"pan": 0, "e": 0}},
+    ]).to_list(50)
+    return ok(rows)

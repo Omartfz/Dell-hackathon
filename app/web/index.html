@@ -1,205 +1,238 @@
-<!doctype html>
-<html lang="en"><head>
+<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SafeContext</title><link rel="stylesheet" href="/static/styles.css">
-</head><body>
+<title>SafeContext</title><link rel="stylesheet" href="/static/styles.css"></head><body>
+<div class="layout">
 
-<header>
-  <div class="bar">
-    <div class="brand"><span class="dot">S</span> SafeContext</div>
-    <span class="badge" id="model-badge">local model · …</span>
-    <span class="badge" id="mongo-badge">mongo · …</span>
-    <span class="badge on" id="net-badge">network · online</span>
-    <div class="meter">
-      <div><b id="m-processed">0</b><span>processed</span></div>
-      <div><b id="m-esc">0</b><span>escalated</span></div>
-      <div class="zero"><b id="m-exposed">0</b><span>sensitive out</span></div>
-      <div><b id="m-queued">0</b><span>queued</span></div>
-    </div>
+<aside>
+  <div class="logo"><span class="sq">S</span> SafeContext</div>
+  <div class="navsec">Overview</div>
+  <a data-page="home" class="active"><span class="ico">⌂</span> Home</a>
+  <a data-page="research"><span class="ico">◎</span> Research</a>
+  <a data-page="cards"><span class="ico">▭</span> Cards</a>
+  <div class="navsec">Spend</div>
+  <a data-page="expenses"><span class="ico">☰</span> Expenses</a>
+  <a data-page="payables"><span class="ico">🗎</span> Payables</a>
+  <div class="navsec">Intelligence</div>
+  <a data-page="controls"><span class="ico">🛡</span> Controls</a>
+  <a data-page="treasury"><span class="ico">🏛</span> Treasury</a>
+  <a data-page="automation"><span class="ico">⚡</span> Automation <span class="pill" id="pill-auto">0</span></a>
+  <a data-page="mongo"><span class="ico">🍃</span> MongoDB</a>
+  <div class="who" id="who-btn">
+    <span class="av" id="who-av">AN</span><span id="who-role">Finance / Admin</span>
+    <span class="car">⌄</span>
   </div>
-  <nav class="tabs">
-    <button data-tab="center" class="active">Command center</button>
-    <button data-tab="detail">Escalation detail</button>
-    <button data-tab="mongo">MongoDB</button>
-    <button data-tab="ask">Ask</button>
-    <button data-tab="policy">Policy</button>
-  </nav>
-</header>
+</aside>
 
-<div id="alert"></div>
+<div class="wrap">
+  <div class="top">
+    <div class="search">🔍 Search… <kbd>⌘K</kbd></div>
+    <div class="sp"></div>
+    <button class="iconbtn" id="btn-replay" title="Run stream">＋</button>
+    <button class="iconbtn" title="Alerts">🔔<span class="dot" id="bell">0</span></button>
+    <div class="modelsel" id="modelsel"><span class="led"></span><span id="model-name">local model…</span> ⌄</div>
+    <div class="egress"><b id="egress">0 B</b> egressed</div>
+  </div>
 
-<main>
-  <!-- ------------------------------------------------------------------ -->
-  <section data-panel="center">
-    <div class="row" style="margin-bottom:14px">
-      <button class="primary" id="btn-replay">▶ Run stream</button>
-      <button id="btn-net">🔌 Go offline</button>
-      <button id="btn-drain">Drain queue</button>
-      <button id="btn-role">Role: …</button>
-      <button id="btn-seed" class="danger">Reseed</button>
-      <span class="hint" id="stream-hint">Replay of the seeded book — real inserts, real change stream.</span>
-    </div>
-    <div class="grid g-stream">
-      <div class="card">
-        <h2>Live stream <span class="sub" id="stream-state">idle</span></h2>
-        <div class="legend">
-          <span><i class="t-0"></i>tier 0 · rules</span>
-          <span><i class="t-1"></i>tier 1 · local</span>
-          <span><i class="t-2"></i>tier 2 · escalated</span>
-        </div>
-        <div class="body tight scroll" id="stream"><div class="empty">no events yet</div></div>
-      </div>
-      <div class="card">
-        <h2>Action inbox <span class="sub" id="inbox-count">0 open</span></h2>
-        <div class="body tight scroll" id="inbox"><div class="empty">nothing needs a decision</div></div>
-      </div>
-    </div>
-  </section>
+  <main>
+    <div id="banner"></div>
 
-  <!-- ------------------------------------------------------------------ -->
-  <section data-panel="detail" hidden>
-    <div id="detail-empty" class="card"><div class="empty">
-      Select an escalation from the action inbox.</div></div>
-    <div id="detail" hidden>
-      <div class="grid g2" style="margin-bottom:14px">
-        <div class="card">
-          <h2>Exposure <span class="sub" id="d-policy"></span></h2>
-          <div class="arrow">
-            <div class="n2"><div class="big" id="d-avail">–</div><span>units available</span></div>
-            <div class="sep">→</div>
-            <div class="n2"><div class="big" id="d-sent">–</div><span>units sent</span></div>
-            <div class="sep">·</div>
-            <div class="n2"><div class="big" id="d-exposed" style="color:var(--good)">–</div>
-              <span>sensitive exposed</span></div>
-          </div>
-          <div class="body" style="border-top:1px solid var(--line)">
-            <dl class="kv">
-              <dt>reduction (units)</dt><dd id="d-red-u">–</dd>
-              <dt>reduction (bytes)</dt><dd id="d-red-b">–</dd>
-              <dt>naive full dump</dt><dd id="d-naive">–</dd>
-              <dt>estimated context exposure</dt><dd id="d-est">–</dd>
-              <dt>alias swaps on return</dt><dd id="d-swaps">–</dd>
-            </dl>
-          </div>
-        </div>
-        <div class="card">
-          <h2>Answer <span class="sub">re-identified locally</span></h2>
-          <div class="body" id="d-answer"><span class="hint">no external answer</span></div>
-          <h2 style="border-top:1px solid var(--line)">As the external model saw it</h2>
-          <div class="body mono" id="d-answer-alias"><span class="hint">–</span></div>
-        </div>
+    <!-- ============================ HOME ============================ -->
+    <section class="page on" data-page="home">
+      <h1 class="h1">Home</h1><p class="sub">Command center</p>
+      <div class="actions">
+        <button class="btn pri" id="a-replay">▶ Run stream</button>
+        <button class="btn" id="a-net">🔌 Go offline</button>
+        <button class="btn" id="a-drain">Drain queue</button>
+        <button class="btn" id="a-role">Role: ap_analyst</button>
+        <button class="btn dgr" id="a-seed">Reseed</button>
       </div>
+      <p class="asof" id="asof">Northwind · —</p>
+
+      <div class="tiles">
+        <div class="tile"><div class="lbl">Cash on hand</div><div class="val" id="k-cash">—</div>
+          <div class="foot" id="k-cash-f">treasury</div></div>
+        <div class="tile"><div class="lbl">Net burn / mo</div><div class="val" id="k-burn">—</div>
+          <div class="foot">monthly outflow</div></div>
+        <div class="tile"><div class="lbl">Runway</div><div class="val" id="k-runway">—</div>
+          <div class="foot"><span class="tag g" id="k-runway-t">healthy</span></div></div>
+        <div class="tile"><div class="lbl">Events reasoned about</div><div class="val" id="k-proc">0</div>
+          <div class="foot"><span id="k-esc">0</span> escalated</div></div>
+        <div class="tile"><div class="lbl">Context withheld</div><div class="val" id="k-red">—</div>
+          <div class="foot">of available units</div></div>
+        <div class="tile good"><div class="lbl">Sensitive units exposed</div>
+          <div class="val" id="k-exposed">0</div><div class="foot" id="k-queued">0 queued offline</div></div>
+      </div>
+
       <div class="grid g2">
-        <div class="card">
-          <h2>Payload that left the box <span class="sub" id="d-bytes"></span></h2>
-          <pre id="d-payload">–</pre>
+        <div>
+          <div class="card"><h3>Spend <span class="r">last 3 months</span></h3>
+            <div class="bars" id="c-bars"><div class="blank">—</div></div><div style="height:12px"></div></div>
+
+          <div class="card ai"><h3><span class="dia">◆</span> SafeContext AI <span class="r">planner runs on the box</span></h3>
+            <div class="in">
+              <p>Ask about spend, vendors, fraud or cash. The planner reads the full record
+                 locally and sends an external model only the minimum it needs.</p>
+              <div class="askrow"><input id="ask-in" placeholder="Should we hold the payment to Industrious?">
+                <button class="btn pri" id="ask-go">Ask</button></div>
+              <div class="qs">
+                <button class="q" data-q="Assess whether this vendor payment should be held.">Should we hold this payment?</button>
+                <button class="q" data-q="Explain why this cluster of transactions looks like a fraud ring.">Why is this a fraud ring?</button>
+                <button class="q" data-q="How much have we spent with Industrious this year?">Spend with this vendor</button>
+              </div>
+            </div>
+            <div id="ask-out" hidden>
+              <div class="eyebrow">Payload that left the box <span class="r" id="ask-sum"></span></div>
+              <pre id="ask-pre">—</pre>
+              <div class="eyebrow">Trace</div>
+              <div class="in t"><table id="ask-trace"><tbody></tbody></table></div>
+            </div>
+          </div>
+
+          <div class="card"><h3>Live stream <span class="r" id="stream-state">idle</span></h3>
+            <div class="in t scroll"><table>
+              <thead><tr><th>time</th><th>merchant</th><th>tier</th><th class="num">amount</th><th class="num">ms</th></tr></thead>
+              <tbody id="stream-rows"><tr><td colspan="5" class="blank">no events yet — press Run stream</td></tr></tbody>
+            </table></div>
+          </div>
         </div>
-        <div class="card">
-          <h2>What was withheld <span class="sub" id="d-dec-count"></span></h2>
-          <div class="scroll"><table id="d-decisions">
-            <thead><tr><th>field</th><th>decision</th><th>sensitivity</th><th>reason</th></tr></thead>
-            <tbody></tbody></table></div>
+
+        <div>
+          <div class="card"><h3>Gross spend <span class="r">this period</span></h3>
+            <div class="in" style="padding-bottom:6px"><div class="val" style="font-size:30px;font-weight:670;letter-spacing:-.9px" id="g-total">—</div></div>
+            <div id="g-cats"></div><div style="height:10px"></div></div>
+
+          <div class="card"><div class="eyebrow"><span style="color:var(--blue)">◆</span> AI Insight</div>
+            <div class="in"><div class="val" style="font-size:28px;font-weight:670" id="ins-pct">—</div>
+              <div class="muted" style="margin-top:4px">of available context withheld</div>
+              <p class="muted" style="margin:10px 0 0;line-height:1.5" id="ins-txt">
+                SafeContext reviewed every event locally.</p></div></div>
+
+          <div class="card"><div class="eyebrow">Needs attention <span class="r" id="att-count"></span></div>
+            <div id="att-list"><div class="blank">nothing needs a decision</div></div></div>
+
+          <div class="card"><h3>Top merchants</h3><div class="in t"><table><tbody id="m-rows">
+            <tr><td class="blank">—</td></tr></tbody></table></div></div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ------------------------------------------------------------------ -->
-  <section data-panel="mongo" hidden>
-    <div class="grid g2" style="margin-bottom:14px">
-      <div class="card">
-        <h2>The agent survives its own sandbox</h2>
-        <div class="body">
-          <p class="hint" style="margin-top:0">The stream is driven by a MongoDB change
-          stream, not a poller. Every event checkpoints its <b>resume token</b> into
-          <code>agent_state</code>, and each event id is claimed in
-          <code>processed_events</code> under a unique index. Kill the process and
-          restart: it resumes at the exact position, and cannot re-do work.</p>
-          <dl class="kv">
-            <dt>watching</dt><dd id="cs-watch">–</dd>
-            <dt>checkpoints written</dt><dd id="cs-check">–</dd>
-            <dt>last event id</dt><dd id="cs-last">–</dd>
-            <dt>resume token stored</dt><dd id="cs-token">–</dd>
-            <dt>replica set</dt><dd id="cs-rs">–</dd>
-          </dl>
-          <div class="row" style="margin-top:12px">
-            <button id="btn-kill" class="danger">Simulate crash &amp; resume</button>
-            <span class="hint">stops the stream, then reopens from the stored token</span>
+    <!-- ========================= AUTOMATION ========================= -->
+    <section class="page" data-page="automation">
+      <h1 class="h1">Automation</h1><p class="sub">Your action inbox — surfaced by the agent, unprompted</p>
+      <div style="height:16px"></div>
+      <div class="grid g11">
+        <div class="card"><h3>Open items <span class="r" id="auto-count"></span></h3>
+          <div id="auto-list"><div class="blank">nothing needs a decision</div></div></div>
+        <div id="det-wrap">
+          <div class="card" id="det-blank"><div class="blank">Select an item to see exactly what left the box.</div></div>
+          <div id="det" hidden>
+            <div class="card"><h3>Exposure <span class="r" id="d-policy"></span></h3>
+              <div class="in"><div class="arrow">
+                <div class="n"><b id="d-avail">–</b><span>available</span></div><div class="sep">→</div>
+                <div class="n"><b id="d-sent">–</b><span>sent</span></div><div class="sep">·</div>
+                <div class="n"><b id="d-exp" style="color:var(--green)">–</b><span>sensitive out</span></div>
+              </div></div>
+              <div class="in hr"><dl class="kv">
+                <dt>reduction (units / bytes)</dt><dd id="d-red">–</dd>
+                <dt>naive full dump</dt><dd id="d-naive">–</dd>
+                <dt>estimated context exposure</dt><dd id="d-est">–</dd>
+                <dt>alias swaps on return</dt><dd id="d-swaps">–</dd>
+              </dl></div>
+            </div>
+            <div class="card"><h3>Answer <span class="r">re-identified locally</span></h3>
+              <div class="in" id="d-ans"><span class="muted">no external answer</span></div>
+              <div class="eyebrow hr">As the external model saw it</div>
+              <div class="in mono" id="d-ans-a"><span class="muted">–</span></div></div>
+            <div class="card"><h3>Payload that left the box <span class="r" id="d-bytes"></span></h3>
+              <pre id="d-pre">–</pre></div>
+            <div class="card"><h3>What was withheld <span class="r" id="d-cnt"></span></h3>
+              <div class="in t scroll"><table><thead><tr><th>field</th><th>decision</th>
+                <th>sensitivity</th><th>reason</th></tr></thead><tbody id="d-rows"></tbody></table></div></div>
           </div>
         </div>
       </div>
-      <div class="card">
-        <h2>Real business data <span class="sub" id="mg-total"></span></h2>
-        <div class="scroll"><table id="mg-colls">
-          <thead><tr><th>collection</th><th>documents</th></tr></thead><tbody></tbody></table></div>
-      </div>
-    </div>
-    <div class="grid g2" style="margin-bottom:14px">
-      <div class="card">
-        <h2>$graphLookup — collusion clusters <span class="sub">walked in the engine</span></h2>
-        <div class="scroll"><table id="mg-rings">
-          <thead><tr><th>device</th><th>cards</th><th>txns</th><th>total</th><th>window</th></tr></thead>
-          <tbody></tbody></table></div>
-      </div>
-      <div class="card">
-        <h2>$lookup — banking change vs scheduled payment</h2>
-        <div class="scroll"><table id="mg-risk">
-          <thead><tr><th>vendor</th><th>pending</th><th>changed</th><th>injection</th></tr></thead>
-          <tbody></tbody></table></div>
-      </div>
-    </div>
-    <div class="grid g2">
-      <div class="card">
-        <h2>$facet — spend rollup, one pass</h2>
-        <pre id="mg-spend">–</pre>
-      </div>
-      <div class="card">
-        <h2>Indexes <span class="sub">and why each exists</span></h2>
-        <div class="scroll"><table id="mg-idx">
-          <thead><tr><th>collection</th><th>rationale</th></tr></thead><tbody></tbody></table></div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ------------------------------------------------------------------ -->
-  <section data-panel="ask" hidden>
-    <div class="card" style="margin-bottom:14px">
-      <h2>Ask — same record, different question</h2>
-      <div class="body">
-        <input type="text" id="ask-input" placeholder="Should we hold the payment to Industrious?">
-        <div class="row" style="margin-top:10px">
-          <button class="primary" id="btn-ask">Run planner</button>
-          <button class="q" data-q="Assess whether this vendor payment should be held.">payment hold</button>
-          <button class="q" data-q="Explain why this cluster of transactions looks like a fraud ring.">fraud ring</button>
-          <button class="q" data-q="How much have we spent with Industrious this year?">spend</button>
-        </div>
-        <p class="hint" style="margin-bottom:0">The planner runs on the box. Change the
-        question and the payload changes — that is the difference between this and a
-        static redaction filter.</p>
-      </div>
-    </div>
-    <div class="grid g2">
-      <div class="card"><h2>Trace</h2><div class="body tight"><table id="ask-trace">
-        <thead><tr><th>#</th><th>tool</th><th>detail</th><th>ms</th></tr></thead><tbody></tbody></table></div></div>
-      <div class="card"><h2>Payload <span class="sub" id="ask-sum"></span></h2><pre id="ask-payload">–</pre></div>
-    </div>
-  </section>
+    <!-- ========================== CONTROLS ========================== -->
+    <section class="page" data-page="controls">
+      <h1 class="h1">Controls</h1><p class="sub">Retrieval that changes behaviour — edit a document, not the code</p>
+      <div style="height:16px"></div>
+      <div class="card"><h3>Policies <span class="r">stored in MongoDB</span></h3>
+        <div class="in"><p class="muted" style="margin:0">Flip the role or edit a policy and the
+          <b>very next escalation</b> produces a different payload. No redeploy, no restart, no new model.</p></div>
+        <div class="in t"><table><thead><tr><th>policy</th><th>role</th><th>task</th>
+          <th class="num">allow</th><th class="num">deny</th><th>forced transforms</th></tr></thead>
+          <tbody id="pol-rows"></tbody></table></div></div>
+      <div class="card"><h3>Field catalog <span class="r">the allow-list</span></h3>
+        <div class="in t scroll"><table><thead><tr><th>field</th><th>sensitivity</th>
+          <th>allowed ops</th></tr></thead><tbody id="cat-rows"></tbody></table></div></div>
+    </section>
 
-  <!-- ------------------------------------------------------------------ -->
-  <section data-panel="policy" hidden>
-    <div class="card">
-      <h2>Retrieval that changes behaviour <span class="sub">edit a document, not the code</span></h2>
-      <div class="body">
-        <p class="hint" style="margin-top:0">These policies live in MongoDB. Flip the
-        role or edit a policy and the very next escalation produces a different
-        payload — no redeploy, no restart, no new model.</p>
+    <!-- =========================== MONGODB ========================== -->
+    <section class="page" data-page="mongo">
+      <h1 class="h1">MongoDB</h1><p class="sub">The database is the runtime, not a store</p>
+      <div style="height:16px"></div>
+      <div class="grid g11">
+        <div class="card"><h3>The agent survives its own sandbox</h3>
+          <div class="in"><p class="muted" style="margin:0 0 11px;line-height:1.55">
+            The stream is driven by a <b>change stream</b>, not a poller. Every event checkpoints its
+            <b>resume token</b> to <code>agent_state</code>, and each event id is claimed in
+            <code>processed_events</code> under a unique index. Kill the process and it resumes at the
+            exact position — and cannot redo work.</p>
+            <dl class="kv"><dt>watching</dt><dd id="cs-w">–</dd>
+              <dt>checkpoints written</dt><dd id="cs-c">–</dd>
+              <dt>last event id</dt><dd id="cs-l">–</dd>
+              <dt>resume token stored</dt><dd id="cs-t">–</dd>
+              <dt>replica set</dt><dd id="cs-r">–</dd></dl>
+            <div style="margin-top:12px"><button class="btn dgr" id="a-kill">Simulate crash &amp; resume</button></div>
+          </div></div>
+        <div class="card"><h3>Real business data <span class="r" id="mg-tot"></span></h3>
+          <div class="in t scroll"><table><thead><tr><th>collection</th><th class="num">documents</th></tr></thead>
+            <tbody id="mg-colls"></tbody></table></div></div>
       </div>
-      <div class="scroll"><table id="pol-table">
-        <thead><tr><th>policy</th><th>role</th><th>task</th><th>allow</th><th>deny</th><th>transforms</th></tr></thead>
-        <tbody></tbody></table></div>
-    </div>
-  </section>
-</main>
+      <div class="grid g11">
+        <div class="card"><h3>$graphLookup <span class="r">collusion clusters, walked in the engine</span></h3>
+          <div class="in t"><table><thead><tr><th>device</th><th class="num">cards</th>
+            <th class="num">txns</th><th class="num">total</th><th class="num">window</th></tr></thead>
+            <tbody id="mg-rings"></tbody></table></div></div>
+        <div class="card"><h3>$lookup <span class="r">banking change vs scheduled payment</span></h3>
+          <div class="in t"><table><thead><tr><th>vendor</th><th class="num">pending</th>
+            <th>changed</th><th>injection</th></tr></thead><tbody id="mg-risk"></tbody></table></div></div>
+      </div>
+      <div class="card"><h3>Indexes <span class="r">and the query each one serves</span></h3>
+        <div class="in t scroll"><table><thead><tr><th>collection</th><th>rationale</th></tr></thead>
+          <tbody id="mg-idx"></tbody></table></div></div>
+    </section>
 
-<script src="/static/app.js"></script>
-</body></html>
+    <!-- ===================== simple stub pages ====================== -->
+    <section class="page" data-page="payables"><h1 class="h1">Payables</h1>
+      <p class="sub">Scheduled vendor payments — the invoice stream</p><div style="height:16px"></div>
+      <div class="card"><div class="in t"><table><thead><tr><th>invoice</th><th>vendor</th>
+        <th class="num">amount</th><th>scheduled</th><th>injection</th><th>status</th></tr></thead>
+        <tbody id="pay-rows"></tbody></table></div></div></section>
+
+    <section class="page" data-page="expenses"><h1 class="h1">Expenses</h1>
+      <p class="sub">Card transactions — the event stream</p><div style="height:16px"></div>
+      <div class="card"><div class="in t scroll"><table><thead><tr><th>date</th><th>merchant</th>
+        <th>category</th><th class="num">amount</th><th>flags</th><th class="num">risk</th></tr></thead>
+        <tbody id="exp-rows"></tbody></table></div></div></section>
+
+    <section class="page" data-page="cards"><h1 class="h1">Cards</h1>
+      <p class="sub">PANs are catalog-floored — they can never leave the box</p><div style="height:16px"></div>
+      <div class="card"><div class="in t"><table><thead><tr><th>card</th><th>holder</th>
+        <th class="num">limit</th><th>status</th></tr></thead><tbody id="card-rows"></tbody></table></div></div></section>
+
+    <section class="page" data-page="treasury"><h1 class="h1">Treasury</h1>
+      <p class="sub">Cash, burn and runway — MNPI, banded before any escalation</p><div style="height:16px"></div>
+      <div class="tiles" id="tre-tiles"></div></section>
+
+    <section class="page" data-page="research"><h1 class="h1">Research</h1>
+      <p class="sub">Public company data — the one surface where egress is unrestricted</p>
+      <div style="height:16px"></div>
+      <div class="card"><div class="in"><p class="muted" style="margin:0">
+        Public filings carry nothing to protect, so this screen would route straight to a cloud model.
+        Every other screen in this console is local-only. Same app, two data-residency regimes,
+        decided by what the data <i>is</i>.</p></div></div></section>
+  </main>
+</div></div>
+<script src="/static/app.js"></script></body></html>
