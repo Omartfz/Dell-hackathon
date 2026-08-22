@@ -183,3 +183,24 @@ pre{margin:0;padding:14px 16px;overflow:auto;background:#fbfcfd;font-size:11.5px
   background:var(--red-bg);color:#a3282c;border:1px solid #f5cfd0}
 .banner.ok{background:var(--green-bg);color:#0b6b3d;border-color:#c6e6d3}
 .page{display:none}.page.on{display:block}
+
+/* --- brexify extras --- */
+.tiles.t3{grid-template-columns:repeat(3,1fr);margin-bottom:14px}
+.spark{width:100%;height:26px;margin-top:8px;display:block}
+.spark path{fill:none;stroke:var(--blue);stroke-width:1.6}
+.spark.red path{stroke:var(--red)}
+.spark .fillp{fill:rgba(59,110,245,.10);stroke:none}
+.spark.red .fillp{fill:rgba(229,72,77,.10)}
+.fclegend{display:flex;gap:16px;padding:0 16px 13px;font-size:11.5px;color:var(--ink-3)}
+.fclegend i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:5px;
+  vertical-align:middle}
+.fclegend .ln{background:var(--blue)}.fclegend .bd{background:#cfdcfb;height:8px}
+.fclegend .tdy{background:var(--ink-3);width:2px;height:10px}
+#fc .band{fill:rgba(59,110,245,.13)}
+#fc .line{fill:none;stroke:var(--blue);stroke-width:2}
+#fc .fut{stroke-dasharray:4 3}
+#fc .axis{stroke:var(--line);stroke-width:1}
+#fc .today{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:3 3}
+#fc text{font-size:10px;fill:var(--ink-3);font-family:var(--sans)}
+.banner{font-size:12.5px;padding:9px 13px;background:var(--amber-bg);color:#8a5a10;
+  border-color:#f2ddb8;line-height:1.45}
